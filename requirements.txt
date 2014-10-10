@@ -1,0 +1,11 @@
+uwsgi
+pytz
+flask
+flask-login
+flask-mail
+psycopg2
+flask-sqlalchemy
+flask-principal
+flask-bcrypt
+flask-wtf
+flask-migrate

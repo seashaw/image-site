@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<title>Object Tracker</title>
+{# User name and log in/out links. #}
+{% if current_user.is_authenticated() %}
+    <li>{{ current_user.user_name }}</li>
+    <li><a href="{{ url_for('logout') }}">Logout</a></li>
+{% else %}
+    <li><a href="{{ url_for('login') }}">login</a></li>
+{% endif %}
+
+{# List flashed messages. #}
+{% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <ul class="flashes">
+            {% for message in messages %}
+                <li>
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+{% block body %} {% endblock %}

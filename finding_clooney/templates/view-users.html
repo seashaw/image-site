@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block body %}
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html; charset=utf-8">
+        <title>
+            Here are all of the user results.
+        </title>
+        <h2>
+            Here is a list of usernames.
+        </h2>
+    </head>
+    <body>
+        {% for user in users %}
+            <p>{{ user.user_name }}</p>
+        {% endfor %}
+    </body>
+</html>
+{% endblock %}

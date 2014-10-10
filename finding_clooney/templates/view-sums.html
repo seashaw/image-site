@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block body %}
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Here are all of the sum results.</title>
+    <h3>
+        Select test.
+    </h3>
+</head>
+<body>
+    {% for s in sums %}
+        <p>{{ s.sum }}</p>
+    {% endfor %}
+</body>
+{% endblock %}

@@ -26,7 +26,7 @@ app.config.update(dict(
     SQLALCHEMY_DATABASE_URI = 'postgres://mrfutgwstulvmt:jiHimtGvsqSEYPSpffEHNYltXI@ec2-54-225-101-18.compute-1.amazonaws.com:5432/d1uq883smd9evh',
 
     SECRET_KEY = "In development.",
-    SERVER_NAME = "www.angryhoes.com",
+    SERVER_NAME = "www.findingclooney.com",
 
     # Mail settings.
     MAIL_SERVER = "smtp.googlemail.com",

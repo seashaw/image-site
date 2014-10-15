@@ -22,8 +22,8 @@ app = Flask(__name__)
 app.config.update(dict(
     # SQLAlchemy database connection address.
     # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL"),
-    # Hardcoded URI to isolate local projects.  Not the best, but good enough
-    SQLALCHEMY_DATABASE_URI = 'postgres://mrfutgwstulvmt:jiHimtGvsqSEYPSpffEHNYltXI@ec2-54-225-101-18.compute-1.amazonaws.com:5432/d1uq883smd9evh',
+    # Hardcoded URI to isolate local projects. HEROKU_POSTGRESQL_MAUVE_URL
+    SQLALCHEMY_DATABASE_URI = 'postgres://bgxwtufpffxnff:bkh5prFQyHpC3VXL1N9W3h_wDZ@ec2-54-204-31-13.compute-1.amazonaws.com:5432/dbd3goi65hqu8d',
 
     SECRET_KEY = "In development.",
     SERVER_NAME = "www.findingclooney.com",

@@ -1,40 +1,29 @@
 {% extends 'base.html' %}
-<head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <title>Welcome to Object Tracker</title>
-</head>
 {% block body %}
-    <h1 id="heading">jQuery Example</h1>
-    <p>
-        <input type=text size=5 name=a>
-        +
-        <input type=text size=5 name=b>
-        =
-        <span id=result>
-        ?
-        </span>
-    </p>
-    <p>
-        <a href=# id=calculate>
-            calculate server side
-        </a>
-    </p>
-    <script type="text/javascript" charset="utf-8" 
-        src="https://code.jquery.com/jquery-2.1.1.min.js">
-    </script>
-
-    <script type="text/javascript" charset="utf-8">
-        $(document).ready(function() {
-            $('a#calculate').bind('click', function() {
-                $.getJSON('/_add-numbers', {
-                        a: $('input[name="a"]').val(),
-                        b: $('input[name="b"]').val()
-                    },
-                    function(data) {
-                        $('#result').text(data.sum);
-                    }
-                );
-            });
-        });
-    </script>
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-9 blog-main">
+                {% for post in posts %}
+                    <div class="blog-post">
+                        <h2 class="blog-post-title">
+                            {{ post.title }}
+                        </h2>
+                        <h4 class="blog-post-subtitle">
+                            {{ post.subtitle }}
+                        </h4>
+                        <h6 class="blog-post-meta">
+                            published by <a href="{{ url_for('viewProfile', user_name=post.user.user_name) }}">{{ post.user.user_name }}</a> on {{ post.date }}
+                        </h6>
+                        <p>
+                            {{ post.body }}
+                        </p>
+                    </div> {# end blog-post #}
+                {% endfor %}
+            </div> {# end blog-main #}
+            <div class="col-xs-3 blog-sidebar">
+                {% include 'sidebar.html' %}
+            </div>
+        </div> {# end row #}
+        {% include 'footer.html' %}
+    </div> {# end container #}
 {% endblock %}

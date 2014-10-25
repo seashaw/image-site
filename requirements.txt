@@ -9,3 +9,4 @@ flask-principal
 flask-bcrypt
 flask-wtf
 flask-migrate
+flask-admin

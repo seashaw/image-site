@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block body %}
+    <h1 id="heading">{{ user.user_name }}</h1>
+    <h2 id="heading">Roles:</h2>
+    <ul>
+        {% for role in user.roles %}
+            <li>
+                {{ role.name }} - {{ role.description }}
+            </li>
+        {% endfor %}
+    </ul>
+    <h2 id="heading">Posts:</h2>
+    <ul>
+        {% for post in user.posts %}
+            <li> 
+                <a href="{{ url_for('viewPost', post_id=post.id) }}">
+                    {{ post.title }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

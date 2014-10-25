@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block body %}
+
+    {# Form error notifications. #}
+    {% if form.errors %}
+        <ul class="errors">
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <li>
+                        {{ form[field_name].label }}: {{ error }}
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form action="/edit/{{ post_id }}" method=post accept-charset="utf-8">
+        {{ form.hidden_tag() }}
+        {{ form.title.label }} {{ form.title(size=80) }} <br>
+        {{ form.subtitle.label }} {{ form.subtitle(size=80) }}<br>
+        {{ form.body.label }} {{ form.body() }}<br>
+    <p>{{ form.submit }}</p>
+    </form>
+
+{% endblock %}

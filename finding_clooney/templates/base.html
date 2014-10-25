@@ -1,23 +1,100 @@
 <!DOCTYPE HTML>
-<title>Object Tracker</title>
-{# User name and log in/out links. #}
-{% if current_user.is_authenticated() %}
-    <li>{{ current_user.user_name }}</li>
-    <li><a href="{{ url_for('logout') }}">Logout</a></li>
-{% else %}
-    <li><a href="{{ url_for('login') }}">login</a></li>
-{% endif %}
+{% block head %}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {# Bootstrap CSS CDN #}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" type="text/css">
+
+    <title>Finding Clooney</title>
+{% endblock %}
+
+{# Top navbar. #}
+<div class="navbar navbar-default" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            {# Finding Clooney brand.#}
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                Finding Clooney
+            </a>
+        </div> {# end navbar-header #}
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li class="navbar-right">
+                    <a href="#">
+                        About
+                    </a>
+                </li>
+                {# User name and log in/out links. #}
+                {% if current_user.is_authenticated() %}
+                    <li>
+                        <a href="{{ url_for('createPost') }}">
+                            New Post
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            Contact
+                        </a>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            {{ current_user.user_name }}
+                            <span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu" role="menu">
+                            <li>
+                                <a href="{{ url_for('viewProfile', user_name=current_user.user_name) }}">
+                                    Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    Posts
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    Inbox
+                                </a>
+                            </li>
+                            <li class="divider"></li>
+                            <li>
+                                <a href="{{ url_for('logout') }}">
+                                    Logout
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ url_for('login') }}">
+                            Login
+                        </a>
+                    </li>
+                {% endif %}
+            </ul> {# end nav navbar-nav #}
+        </div> {# end collapse navbar-collapse #}
+    </div> {# end container #}
+</div> {# end navbar navbar-default #}
 
 {# List flashed messages. #}
 {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul class="flashes">
-            {% for message in messages %}
-                <li>
-                    {{ message }}
-                </li>
-            {% endfor %}
-        </ul>
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 {% endwith %}
-{% block body %} {% endblock %}
+
+{% block body %}{% endblock %}

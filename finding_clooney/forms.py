@@ -5,7 +5,7 @@ Description: Forms and custom validators for form fields.
 """
 from . model import User
 from flask.ext.wtf import Form
-from wtforms import TextField, SubmitField, PasswordField
+from wtforms import TextField, SubmitField, PasswordField, TextAreaField
 from wtforms.validators import Required, Length, EqualTo, ValidationError
 
 """
@@ -53,3 +53,12 @@ class RegisterForm(Form):
         EqualTo("confirm", message="Passwords must match.")])
     confirm = PasswordField("Confirm Password")
     submit = SubmitField("Register")
+
+class EditPostForm(Form):
+    """
+    Form for creating and editing blog posts.
+    """
+    title = TextField('Title', validators=[Required()])
+    subtitle = TextField('Subtitle', validators=[Required()])
+    body = TextAreaField('Body', validators=[Required()])
+    submit = SubmitField("Post")

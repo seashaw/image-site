@@ -29,6 +29,7 @@ Routing functions, controller logic, view redirection.
 
 @app.route("/")
 @app.route("/index")
+@login_required
 def index():
     """
     Greeter page containing information about web application.
@@ -129,6 +130,7 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route('/users/<user_name>')
+@login_required
 def viewProfile(user_name):
     """
     Display user information and profile.
@@ -177,6 +179,7 @@ def editPost(post_id):
         return redirect(url_for('index'))
 
 @app.route('/post/<post_id>', methods=["GET", "POST"])
+@login_required
 def viewPost(post_id):
     """
     Viewing an individual post.

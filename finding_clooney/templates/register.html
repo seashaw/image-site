@@ -1,28 +1,49 @@
 {% extends "base.html" %}
 {% block body %}
-
-    {# Form error notifications. #}
-    {% if form.errors %}
-        <ul class="errors">
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                    <li>
-                        {{ form[field_name].label }}: {{ error }}
-                    </li>
+    <div class="container">
+        {# Form error notifications. #}
+        {% if form.errors %}
+            <ul class="errors">
+                {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                    {% for error in field_errors %}
+                        <li>
+                            {{ form[field_name].label }}: {{ error }}
+                        </li>
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </ul>
-    {% endif %}
+            </ul>
+        {% endif %}
 
-    <form action="/register" method=post accept-charset="utf-8">
-        {{ form.hidden_tag() }}
-        {{ form.first_name.label }} {{ form.first_name(size=80) }} <br>
-        {{ form.last_name.label }} {{ form.last_name(size=80) }}<br>
-        {{ form.email.label }} {{ form.email(size=80) }}<br>
-        {{ form.user_name.label }} {{ form.user_name(size=80) }}<br>
-        {{ form.password.label }} {{ form.password(size=80) }}<br>
-        {{ form.confirm.label }} {{ form.confirm(size=80) }}<br>
-    <p>{{ form.submit }}</p>
-    </form>
-
+        <form role="form" action="/register" method=post accept-charset="utf-8">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.first_name.label }}
+                {{ form.first_name(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.last_name.label }}
+                {{ form.last_name(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.email.label }}
+                {{ form.email(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.user_name.label }}
+                {{ form.user_name(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.password.label }}
+                {{ form.password(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.confirm.label }}
+                {{ form.confirm(size=80, class_="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-default">
+                Register
+            </button>
+        </form>
+        {% include 'footer.html' %}
+    </div>
 {% endblock %}

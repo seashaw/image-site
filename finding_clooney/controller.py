@@ -1,9 +1,10 @@
 """
 File: controller.py
 Authors: 
-    2014-10-10 - C.Shaw
-Description: Routing for web application, generates views using templates,
-             and handles logic for user interaction.
+    2014-10-10 - C.Shaw <shaw.colin@gmail.com>
+Description:
+    Routing for web application, generates views using templates,
+    and handles logic for user interaction.
 """
 
 import hashlib
@@ -21,7 +22,7 @@ from flask.ext.login import login_required, login_user, logout_user, current_use
 from flask.ext.mail import Message
 from flask.ext.principal import (Identity, AnonymousIdentity, identity_changed,
         Permission, RoleNeed)
-from flask.ext.admin import BaseView, expose
+from flask.ext.admin.contrib.sqla import ModelView
 
 """
 Routing functions, controller logic, view redirection.
@@ -209,9 +210,13 @@ def viewUsers():
         flash('You lack admin rights.')
         return redirect(url_for('index'))
 
-class EditPostView(BaseView):
+"""
+Administrative views.
+"""
+
+class UsersAdminView(ModelView):
     """
-    Admin view for editing blog posts.
+    Admin view for user management.
     """
 
     def is_accessible(self):
@@ -221,9 +226,26 @@ class EditPostView(BaseView):
         admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
-    @expose('/')
-    def index(self):
+class RolesAdminView(ModelView):
+    """
+    Admin view for role management.
+    """
+
+    def is_accessible(self):
         """
-        Renders administrative edit page.
+        Restrict access to authenticated users.
         """
-        return self.render('editpost.html')
+        admin_permission = Permission(RoleNeed('Administrator'))
+        return admin_permission.can()
+
+class PostsAdminView(ModelView):
+    """
+    Admin view for post management.
+    """
+
+    def is_accessible(self):
+        """
+        Restrict access to authenticated users.
+        """
+        admin_permission = Permission(RoleNeed('Administrator'))
+        return admin_permission.can()

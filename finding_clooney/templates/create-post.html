@@ -1,25 +1,35 @@
 {% extends "base.html" %}
 {% block body %}
-    <div classs="container">
-    {# Form error notifications. #}
-    {% if form.errors %}
-        {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-            {% for error in field_errors %}
-                <div class="alert alert-danger" role="alert">
-                    {{ form[field_name].label }}: {{ error }}
-                </div>
+    <div class="container">
+        {# Form error notifications. #}
+        {% if form.errors %}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form[field_name].label }}: {{ error }}
+                    </div>
+                {% endfor %}
             {% endfor %}
-        {% endfor %}
-    {% endif %}
+        {% endif %}
 
-    <form action="/post/" method=post accept-charset="utf-8">
-        {{ form.hidden_tag() }}
-        {{ form.title.label }} {{ form.title(size=80) }} <br>
-        {{ form.subtitle.label }} {{ form.subtitle(size=80) }}<br>
-        {{ form.body.label }} {{ form.body() }}<br>
-    <p>{{ form.submit }}</p>
-    </form>
-
-    {% include 'footer.html' %}
-</div> {# end container #}
+        <form role="form" action="/post/" method=post accept-charset="utf-8">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.title.label }}
+                {{ form.title(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.subtitle.label }}
+                {{ form.subtitle(size=80, class_="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.body.label }}
+                {{ form.body(class_="form-control") }}
+            </div>
+            <button type="submit" class="btn btn-default">
+                Post
+            </button>
+        </form>
+        {% include 'footer.html' %}
+    </div>
 {% endblock %}

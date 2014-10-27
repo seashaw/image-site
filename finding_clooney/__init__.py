@@ -1,7 +1,7 @@
 """
 File: __init__.py
 Authors:
-    2014-10-10 - C.Shaw
+    2014-10-10 - C.Shaw <shaw.colin@gmail.com>
 Description: 
     Initialization module for object tracker application.
     Order of initializations and imports is particular.
@@ -19,7 +19,6 @@ from flask.ext.login import LoginManager, current_user
 from flask.ext.principal import (Principal, identity_loaded, Permission,
         RoleNeed, UserNeed)
 from flask.ext.admin import Admin
-from flask.ext.admin.contrib.sqla import ModelView
 
 # Initialize the application.
 app = Flask(__name__)
@@ -124,8 +123,8 @@ def onIdentityLoad(sender, identity):
 
 # Object tracker controller import.
 import finding_clooney.controller
-from finding_clooney.controller import EditPostView
-admin.add_view(EditPostView(name='Greetings!'))
-admin.add_view(ModelView(User, db.session, name='Users'))
-admin.add_view(ModelView(Role, db.session, name='Roles'))
-admin.add_view(ModelView(Post, db.session, name='Posts'))
+from finding_clooney.controller import (UsersAdminView, RolesAdminView,
+        PostsAdminView)
+admin.add_view(UsersAdminView(User, db.session, name='Users'))
+admin.add_view(RolesAdminView(Role, db.session, name='Roles'))
+admin.add_view(PostsAdminView(Post, db.session, name='Posts'))

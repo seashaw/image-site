@@ -27,11 +27,6 @@
         </div> {# end navbar-header #}
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li class="navbar-right">
-                    <a href="#">
-                        About
-                    </a>
-                </li>
                 {# User name and log in/out links. #}
                 {% if current_user.is_authenticated() %}
                     <li>
@@ -42,6 +37,11 @@
                     <li>
                         <a href="#">
                             Contact
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            About
                         </a>
                     </li>
                     <li class="dropdown">
@@ -75,6 +75,11 @@
                         </ul>
                     </li>
                 {% else %}
+                    <li>
+                        <a href="#">
+                            About
+                        </a>
+                    </li>
                     <li>
                         <a href="{{ url_for('login') }}">
                             Login

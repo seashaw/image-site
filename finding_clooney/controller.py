@@ -210,6 +210,13 @@ def viewUsers():
         flash('You lack admin rights.')
         return redirect(url_for('index'))
 
+@app.route('/hello')
+def helloWorld():
+    """
+    Test end point for configuring.
+    """
+    return 'Hello world!'
+
 """
 Administrative views.
 """

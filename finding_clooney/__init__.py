@@ -33,6 +33,7 @@ app.config.update(dict(
 
     SECRET_KEY = "In development.",
     SERVER_NAME = "www.findingclooney.com",
+    #SERVER_NAME = '168.235.67.254:8000',
 
     # Mail settings.
     MAIL_SERVER = "smtp.googlemail.com",

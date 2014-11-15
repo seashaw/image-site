@@ -1,8 +1,9 @@
 '''
 File: model.py
 Authors: 
-    2014-10-10 - C.Shaw
-Description: Handles database connection and manipulation.
+    2014-11-14 - C.Shaw <shaw.colin@gmail.com>
+Description: 
+    Handles database connection and manipulation.
 '''
 
 from . import app, db
@@ -94,30 +95,3 @@ class Post(db.Model):
         
     def __repr__(self):
         return '<id: {} title: {}>'.format(self.id, self.title)
-
-class DBHandler:
-    """
-    A custom wrapper class over SQLAlchemy, handles database CRUD operations as
-    well as error reporting (eventually).
-    """
-
-    def __init__(self, db):
-        self.db = db
-
-    def insertUser(self, user):
-        """
-        Inserts new user record into table 'users'.
-        """
-        try:
-            db.session.add(user)
-            db.session.commit()
-        except Exception as e:
-            return False
-        return True
-
-    def fetchAllUserNames(self):
-        """
-        Fetches all user names from table 'users'.
-        """
-        #all_users = User.query.all() # SQLAlchemy select.
-        return db.engine.execute('SELECT user_name FROM users')

@@ -1,7 +1,7 @@
 """
 File: controller.py
 Authors: 
-    2014-10-10 - C.Shaw <shaw.colin@gmail.com>
+    2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description:
     Routing for web application, generates views using templates,
     and handles logic for user interaction.
@@ -12,7 +12,7 @@ from datetime import datetime
 import pytz
 from pytz import timezone
 
-from . import app, bc, dbh, mail, db, EditBlogPostPermission
+from . import app, bc, mail, db, EditBlogPostPermission
 from . model import User, Post
 from . forms import LoginForm, RegisterForm, EditPostForm
 
@@ -23,6 +23,7 @@ from flask.ext.mail import Message
 from flask.ext.principal import (Identity, AnonymousIdentity, identity_changed,
         Permission, RoleNeed)
 from flask.ext.admin.contrib.sqla import ModelView
+from flask.ext.admin import expose, BaseView
 
 """
 Routing functions, controller logic, view redirection.
@@ -48,20 +49,23 @@ def register():
                 bc.generate_password_hash(form.password.data, rounds=12),
                 False, form.first_name.data, form.last_name.data, 
                 form.user_name.data, [])
-        # Try to insert new user into database.
-        if dbh.insertUser(user):
+        try:
+            # Try to insert new user into database.
+            db.session.add(user)
+            db.session.commit()
             # URL for user confirmation.
             confirm_url = url_for("confirmUser", user_email=user.email,
                     id_hash=hashlib.sha1(str(user.id).encode()).hexdigest(),
                     _external=True)
             # Create and send confirmation email.
             subject = "Please confirm your account."
-            html = "Click <a href='{}'>here</a> to confirm.".format(confirm_url)
+            html = "Click <a href='{}'>here</a> to confirm.".format(
+                    confirm_url)
             msg = Message(subject=subject, recipients=[user.email], html=html)
             mail.send(msg)
             flash("Confirmation email sent.")
             return redirect(request.args.get("next") or url_for("login"))
-        else:
+        except Exception as e:
             flash("Registration failed.")
             return redirect(url_for("login"))
     return render_template("register.html", form=form)
@@ -188,28 +192,6 @@ def viewPost(post_id):
     post = Post.query.get(post_id)
     return render_template('view-post.html', post=post)
 
-@app.route("/_add-numbers")
-def addNumbers():
-    """
-    Sums two GET request variables and returns result.
-    """
-    a = request.args.get("a", 0, type=int)
-    b = request.args.get("b", 0, type=int)
-    return jsonify(sum=a+b)
-
-@app.route("/view-users")
-@login_required
-def viewUsers():
-    """
-    Displays list of usernames.
-    """
-    admin_permission = Permission(RoleNeed('Administrator'))
-    if admin_permission.can():
-        return render_template("view-users.html", users=dbh.fetchAllUserNames())
-    else:
-        flash('You lack admin rights.')
-        return redirect(url_for('index'))
-
 @app.route('/hello')
 def helloWorld():
     """
@@ -221,7 +203,22 @@ def helloWorld():
 Administrative views.
 """
 
-class UsersAdminView(ModelView):
+class HomeView(BaseView):
+    """
+    Index view route for administration.
+    """
+    def is_accessible(self):
+        """
+        Restrict access to authenticated users.
+        """
+        admin_permission = Permission(RoleNeed('Administrator'))
+        return admin_permission.can()
+
+    @expose('/')
+    def index(self):
+        return self.render('admin/index.html') # Do I need to create this view?
+
+class UsersView(ModelView):
     """
     Admin view for user management.
     """
@@ -233,7 +230,7 @@ class UsersAdminView(ModelView):
         admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
-class RolesAdminView(ModelView):
+class RolesView(ModelView):
     """
     Admin view for role management.
     """
@@ -245,7 +242,7 @@ class RolesAdminView(ModelView):
         admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
-class PostsAdminView(ModelView):
+class PostsView(ModelView):
     """
     Admin view for post management.
     """

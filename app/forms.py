@@ -1,6 +1,6 @@
 """
 File: forms.py
-Created: 2014-10-06 by Colin Shaw
+Created: 2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description: Forms and custom validators for form fields.
 """
 from . model import User

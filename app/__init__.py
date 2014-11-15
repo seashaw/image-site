@@ -1,7 +1,7 @@
 """
 File: __init__.py
 Authors:
-    2014-10-10 - C.Shaw <shaw.colin@gmail.com>
+    2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description: 
     Initialization module for object tracker application.
     Order of initializations and imports is particular.
@@ -26,14 +26,10 @@ app = Flask(__name__)
 # Load configuration.
 app.config.update(dict(
     # SQLAlchemy database connection address.
-    # SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL"),
-    # Hardcoded URI to isolate local projects. HEROKU_POSTGRESQL_MAUVE_URL
-    SQLALCHEMY_DATABASE_URI = ('postgres://bgxwtufpffxnff:bkh5prFQyHpC3VXL1N9W'
-        '3h_wDZ@ec2-54-204-31-13.compute-1.amazonaws.com:5432/dbd3goi65hqu8d'),
+    # SQLALCHEMY_DATABASE_URI = # local connection info here.
 
     SECRET_KEY = "In development.",
-    SERVER_NAME = "www.findingclooney.com",
-    #SERVER_NAME = '168.235.67.254:8000',
+    SERVER_NAME = "www.angryhos.com",
 
     # Mail settings.
     MAIL_SERVER = "smtp.googlemail.com",
@@ -42,9 +38,9 @@ app.config.update(dict(
     MAIL_USE_SSL = True,
     MAIL_USERNAME = "",
     MAIL_PASSWORD = "",
-    DEFAULT_MAIL_SENDER = "jamesshaw1962@gmail.com",
+    DEFAULT_MAIL_SENDER = "shaw.colin@gmail.com",
 
-    ADMINS = ["jamesshaw1962@gmail.com"]
+    ADMINS = ["shaw.colin@gmail.com"]
 ))
 
 # Bcrypt object initialization.
@@ -64,14 +60,7 @@ mail = Mail(app)
 db = SQLAlchemy(app)
 
 # Object tracker model import.
-from finding_clooney import model
-from finding_clooney.model import User, Role, Post, DBHandler
-
-# Database handler class initialization.
-dbh = DBHandler(db)
-
-# Admin object initialization.
-admin = Admin(app)
+from .model import User, Role, Post
 
 # User loader callback for LoginManager.
 @lm.user_loader
@@ -123,9 +112,11 @@ def onIdentityLoad(sender, identity):
             identity.provides.add(EditBlogPostNeed(post.id))
 
 # Object tracker controller import.
-import finding_clooney.controller
-from finding_clooney.controller import (UsersAdminView, RolesAdminView,
-        PostsAdminView)
-admin.add_view(UsersAdminView(User, db.session, name='Users'))
-admin.add_view(RolesAdminView(Role, db.session, name='Roles'))
-admin.add_view(PostsAdminView(Post, db.session, name='Posts'))
+from .controller import HomeView, UsersView, RolesView, PostsView
+
+# Admin object initialization.
+admin = Admin(app, index_view=HomeView(url='/admin')))
+
+admin.add_view(UsersView(User, db.session, name='Users'))
+admin.add_view(RolesView(Role, db.session, name='Roles'))
+admin.add_view(PostsView(Post, db.session, name='Posts'))

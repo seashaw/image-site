@@ -2,10 +2,11 @@
 """
 Name: manage.py
 Authors:
-    2014-10-10 - C. Shaw
-Description: Script to manage database migrations.
+    2014-11-14 - C.Shaw <shaw.colin@gmail.com>
+Description: 
+    Script to manage database migrations.
 """
-from finding_clooney import app, db, model
+from app import app, db, model
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 

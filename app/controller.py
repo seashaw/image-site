@@ -31,7 +31,6 @@ Routing functions, controller logic, view redirection.
 
 @app.route("/")
 @app.route("/index")
-@login_required
 def index():
     """
     Greeter page containing information about web application.
@@ -135,7 +134,6 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route('/users/<user_name>')
-@login_required
 def viewProfile(user_name):
     """
     Display user information and profile.
@@ -144,7 +142,6 @@ def viewProfile(user_name):
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
-@login_required
 def createPost():
     """
     Creating and posting new blog posts.
@@ -154,14 +151,17 @@ def createPost():
         # Feed form data into post object.
         post = Post(form.title.data, form.subtitle.data, form.body.data,
                 datetime.utcnow(), current_user.id)
-        # Add new post object to database.
-        db.session.add(post)
-        db.session.commit()
-        return redirect(url_for('index'))
+        try:
+            # Add new post object to database.
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('index'))
+        except Exception as e:
+            flash("Post creation failed.")
+            return redirect(url_for("createPost"))
     return render_template('create-post.html', form=form)
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
-@login_required
 def editPost(post_id):
     """
     Editing existing posts.
@@ -180,24 +180,16 @@ def editPost(post_id):
             return redirect(url_for('index'))
         return render_template('edit-post.html', form=form, post_id=post.id)
     else:
-        flash('You lack editing rights.')
+        flash('You lack editing rights for this post.')
         return redirect(url_for('index'))
 
 @app.route('/post/<post_id>', methods=["GET", "POST"])
-@login_required
 def viewPost(post_id):
     """
-    Viewing an individual post.
+    View an individual post.
     """
     post = Post.query.get(post_id)
     return render_template('view-post.html', post=post)
-
-@app.route('/hello')
-def helloWorld():
-    """
-    Test end point for configuring.
-    """
-    return 'Hello world!'
 
 """
 Administrative views.

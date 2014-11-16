@@ -3,10 +3,14 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     {# Bootstrap CSS CDN #}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" type="text/css">
 
-    <title>Finding Clooney</title>
+    {# Custom CSS import, must switch to serving static files with nginx in deployment. #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}" type="text/css">
+
+    <title>Angry Ho's</title>
 {% endblock %}
 
 {# Top navbar. #}
@@ -22,7 +26,7 @@
 
             {# Finding Clooney brand.#}
             <a class="navbar-brand" href="{{ url_for('index') }}">
-                Finding Clooney
+                Angry Ho's
             </a>
         </div> {# end navbar-header #}
         <div class="collapse navbar-collapse">

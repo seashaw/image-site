@@ -1,0 +1,18 @@
+@font-face {
+    font-family: district;
+    src: url(district.woff);
+}
+
+.navbar-default {
+    background-color: #F46111;
+}
+
+.navbar-default .navbar-brand {
+    font-family: district;
+    font-size: 2em;
+    color: rgba(72, 48, 48, 1);
+}
+
+.navbar-default .navbar-collapse .navbar-nav a {
+    color: rgba(72, 48, 48, 1);
+}

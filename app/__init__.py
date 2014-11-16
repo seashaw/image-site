@@ -26,7 +26,7 @@ app = Flask(__name__)
 # Load configuration.
 app.config.update(dict(
     # SQLAlchemy database connection address.
-    # SQLALCHEMY_DATABASE_URI = # local connection info here.
+    SQLALCHEMY_DATABASE_URI = 'postgres://angryhos:hobag@localhost/angryhos',
 
     SECRET_KEY = "In development.",
     SERVER_NAME = "www.angryhos.com",
@@ -115,7 +115,7 @@ def onIdentityLoad(sender, identity):
 from .controller import HomeView, UsersView, RolesView, PostsView
 
 # Admin object initialization.
-admin = Admin(app, index_view=HomeView(url='/admin')))
+admin = Admin(app, index_view=HomeView(url='/admin'))
 
 admin.add_view(UsersView(User, db.session, name='Users'))
 admin.add_view(RolesView(Role, db.session, name='Roles'))

@@ -30,7 +30,7 @@ Routing functions, controller logic, view redirection.
 """
 
 @app.route("/")
-@app.route("/index")
+@app.route("/index/<page>", defaults={'page': 1})
 def index():
     """
     Greeter page containing information about web application.
@@ -94,7 +94,7 @@ def login():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash('No account for "{}'.format(email))
+            flash('No account for "{}"'.format(email))
             return redirect(url_for("login"))
         elif not user.confirmed_at:
             flash("Account requires confirmation.")
@@ -134,6 +134,7 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route('/users/<user_name>')
+@login_required
 def viewProfile(user_name):
     """
     Display user information and profile.
@@ -142,6 +143,7 @@ def viewProfile(user_name):
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
+@login_required
 def createPost():
     """
     Creating and posting new blog posts.
@@ -162,6 +164,7 @@ def createPost():
     return render_template('create-post.html', form=form)
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
+@login_required
 def editPost(post_id):
     """
     Editing existing posts.
@@ -184,6 +187,7 @@ def editPost(post_id):
         return redirect(url_for('index'))
 
 @app.route('/post/<post_id>', methods=["GET", "POST"])
+@login_required
 def viewPost(post_id):
     """
     View an individual post.

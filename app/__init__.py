@@ -40,7 +40,11 @@ app.config.update(dict(
     MAIL_PASSWORD = "",
     DEFAULT_MAIL_SENDER = "shaw.colin@gmail.com",
 
-    ADMINS = ["shaw.colin@gmail.com"]
+    ADMINS = ["shaw.colin@gmail.com"],
+
+    # Upload settings.
+    UPLOADED_PICTURES_DEST = ('/var/home/colin/workspace/angryhos/'
+        'app/static/uploads/')
 ))
 
 # Bcrypt object initialization.

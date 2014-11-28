@@ -29,7 +29,9 @@ app.config.update(dict(
     SQLALCHEMY_DATABASE_URI = 'postgres://angryhos:hobag@localhost/angryhos',
 
     SECRET_KEY = "In development.",
-    SERVER_NAME = "www.angryhos.com",
+    #SERVER_NAME = "www.angryhos.com",
+    SERVER_NAME = 'localhost:8080',
+    DEBUG = True,
 
     # Mail settings.
     MAIL_SERVER = "smtp.googlemail.com",
@@ -43,8 +45,7 @@ app.config.update(dict(
     ADMINS = ["shaw.colin@gmail.com"],
 
     # Upload settings.
-    UPLOADED_PICTURES_DEST = ('/var/home/colin/workspace/angryhos/'
-        'app/static/uploads/')
+    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads/'
 ))
 
 # Bcrypt object initialization.

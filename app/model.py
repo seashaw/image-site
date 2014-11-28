@@ -86,12 +86,12 @@ class Post(db.Model):
     pictures = db.relationship('Picture', backref='posts')
 
     def __init__(self, title='', subtitle='', body='', posted_at='',
-            user_id=0, pictures=[]):
+            user_id=0):
         self.title = title
         self.subtitle = subtitle
         self.body = body
-        self.date = date
-        self.author = author
+        self.posted_at = posted_at
+        self.user_id = user_id
         
     def __repr__(self):
         return '<id: {} title: {}>'.format(self.id, self.title)
@@ -102,7 +102,11 @@ class Picture(db.Model):
     """
     __tablename__ = 'pictures'
     id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(80))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+    
+    def __init__(self, filename):
+        self.filename = filename
 
     def __repr__(self):
-        return '<id: {} post_id: {}>'.format(self.id, self.post_id)
+        return '<id: {} filename: {}>'.format(self.id, self.filename)

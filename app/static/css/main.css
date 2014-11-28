@@ -21,3 +21,7 @@
 .navbar-default .navbar-collapse .navbar-nav a {
     color: rgba(72, 48, 48, 1);
 }
+
+.foot-notice {
+    text-align: center
+}

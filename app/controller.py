@@ -7,14 +7,16 @@ Description:
     and handles logic for user interaction.
 """
 
+import os
+from werkzeug import secure_filename
 import hashlib
 from datetime import datetime
 import pytz
 from pytz import timezone
 
 from . import app, bc, mail, db, EditBlogPostPermission
-from . model import User, Post
-from . forms import LoginForm, RegisterForm, EditPostForm
+from .model import User, Post, Picture
+from .forms import LoginForm, RegisterForm, EditPostForm, UploadForm
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session)
@@ -30,7 +32,7 @@ Routing functions, controller logic, view redirection.
 """
 
 @app.route("/")
-@app.route("/index/<page>", defaults={'page': 1})
+@app.route("/index")
 def index():
     """
     Greeter page containing information about web application.
@@ -41,6 +43,9 @@ def index():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """
+    Create and set-up new user.
+    """
     form = RegisterForm()
     if form.validate_on_submit():
         # Feed form data into User object creation.
@@ -77,14 +82,18 @@ def confirmUser(user_email, id_hash):
     user = User.query.filter_by(email=user_email).first()
     if hashlib.sha1(str(user.id).encode()).hexdigest() != id_hash:
         return abort(404)
-    else:
-        if user.confirmed_at is None:
+    elif user.confirmed_at is None:
+        try:
+            os.mkdir(app.config['UPLOAD_FOLDER'].join(str(user.id)))
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
             flash("Account confirmation successful.")
-        else:
-            flash("Account already confirmed.")
+        except Exception as e:
+            flash("Account confirmation failed.")
+            return redirect(url_for('register'))
+    else:
+        flash("Account already confirmed.")
     return redirect(url_for("index"))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -115,7 +124,6 @@ def login():
     return render_template("login.html", form=form)
 
 @app.route("/logout")
-@login_required
 def logout():
     """
     Exit point for logged in users.
@@ -134,7 +142,6 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route('/users/<user_name>')
-@login_required
 def viewProfile(user_name):
     """
     Display user information and profile.
@@ -143,18 +150,23 @@ def viewProfile(user_name):
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
-@login_required
 def createPost():
     """
     Creating and posting new blog posts.
     """
     form = EditPostForm()
     if form.validate_on_submit():
+        # Generate list of post pictures.
+        pics = []
+        if form.pics.data:
+            for pic in form.pics.entries:
+                pics.append(pic)
         # Feed form data into post object.
         post = Post(form.title.data, form.subtitle.data, form.body.data,
                 datetime.utcnow(), current_user.id)
+        post.pictures = pics
+        # Add new post object to database.
         try:
-            # Add new post object to database.
             db.session.add(post)
             db.session.commit()
             return redirect(url_for('index'))
@@ -164,7 +176,6 @@ def createPost():
     return render_template('create-post.html', form=form)
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
-@login_required
 def editPost(post_id):
     """
     Editing existing posts.
@@ -187,13 +198,40 @@ def editPost(post_id):
         return redirect(url_for('index'))
 
 @app.route('/post/<post_id>', methods=["GET", "POST"])
-@login_required
 def viewPost(post_id):
     """
     View an individual post.
     """
     post = Post.query.get(post_id)
     return render_template('view-post.html', post=post)
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload():
+    """
+    Test uploading capabilities, don't actually save to database.
+    """
+    form = UploadForm()
+    if form.validate_on_submit:
+        if form.file.data:
+            file = request.files['file']
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
+            return redirect(url_for('show', image_name=file.filename))
+    return render_template('upload.html', form=form)
+
+@app.route('/view/<pic_url>')
+def view(pic_url):
+    """
+    Test endpoint to view uploaded image.
+    """
+    file_url = url_for('static', filename='uploads/{}'.format(pic_url))
+    return render_template('view.html', file_url=file_url)
+
+@app.route('/show/<image_name>')
+def show(image_name):
+    """
+    Show file upload name.
+    """
+    return "File Name: {}".format(image_name)
 
 """
 Administrative views.

@@ -5,7 +5,8 @@ Description: Forms and custom validators for form fields.
 """
 from . model import User
 from flask.ext.wtf import Form
-from wtforms import TextField, SubmitField, PasswordField, TextAreaField
+from wtforms import (TextField, SubmitField, PasswordField, TextAreaField,
+        FieldList, FileField)
 from wtforms.validators import Required, Length, EqualTo, ValidationError
 
 """
@@ -17,16 +18,14 @@ def emailCheck(form, field):
     Unique email validation.
     """
     if User.query.filter_by(email=field.data).first():
-        raise ValidationError(
-                '"{}" is already registered'.format(field.data))
+        raise ValidationError('"{}" is already registered'.format(field.data))
 
 def userNameCheck(form, field):
     """
     Unique user name validation.
     """
     if User.query.filter_by(user_name=field.data).first():
-        raise ValidationError(
-                '"{}" is already taken'.format(field.data))
+        raise ValidationError('"{}" is already taken'.format(field.data))
 
 
 """
@@ -35,7 +34,7 @@ Forms for user input.
 
 class LoginForm(Form):
     """
-    Form for login.
+    User authentication.
     """
     email = TextField("email", validators=[Required()])
     password = PasswordField("password")
@@ -43,22 +42,30 @@ class LoginForm(Form):
 
 class RegisterForm(Form):
     """
-    Form for registration.
+    User registration.
     """
     email = TextField("@", validators=[Required(), emailCheck] )
     first_name = TextField("First", validators=[Required()])
     last_name = TextField("Last", validators=[Required()])
     user_name = TextField("User", validators=[Required(), userNameCheck])
-    password = PasswordField("New Password", validators=[Required(), 
-        EqualTo("confirm", message="Passwords must match.")])
+    password = PasswordField("New Password", validators=[Required(),
+            EqualTo("confirm", message="Passwords must match.")])
     confirm = PasswordField("Confirm Password")
     submit = SubmitField("Register")
 
 class EditPostForm(Form):
     """
-    Form for creating and editing blog posts.
+    Post creation and editing.
     """
+    #pics = FieldList(FileField('Pics', validators=[Required()]))
+    pics = FileField('Pics', validators=[Required()])
     title = TextField('Title', validators=[Required()])
     subtitle = TextField('Subtitle', validators=[Required()])
     body = TextAreaField('Body', validators=[Required()])
     submit = SubmitField("Post")
+
+class UploadForm(Form):
+    """
+    Form for testing uploading capabilities.
+    """
+    file = FileField('File', validators=[Required()])

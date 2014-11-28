@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="container">
+      {# Form error notifications. #}
+        {% if form.errors %}
+            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
+                {% for error in field_errors %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ form[field_name].label }}: {{ error }}
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        {% endif %}
+
+        <form role="form" action="/upload" method=post accept-charset="utf-8" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <div class="form-group">
+                {{ form.file.label }}
+                {{ form.file(size=80, class_="form-control", multiple_="") }}
+            </div>
+            <button type="submit" class="btn btn-default">
+                Upload
+            </button>
+        </form>
+        {% include 'footer.html' %}
+    </div>
+{% endblock %}

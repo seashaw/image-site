@@ -12,11 +12,11 @@ t            {% for field_name, field_errors in form.errors|dictsort if field_er
             {% endfor %}
         {% endif %}
 
-        <form role="form" action="/create" method=post accept-charset="utf-8">
+        <form role="form" action="/create" method=post accept-charset="utf-8" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <div class="form-group">
                 {{ form.pics.label }}
-                {{ form.pics(size=80, class_="form-control") }}
+                {{ form.pics(multiple="") }}
             </div>
             <div class="form-group">
                 {{ form.title.label }}
@@ -30,9 +30,7 @@ t            {% for field_name, field_errors in form.errors|dictsort if field_er
                 {{ form.body.label }}
                 {{ form.body(class_="form-control") }}
             </div>
-            <button type="submit" class="btn btn-default">
-                Post
-            </button>
+            {{ form.submit(class_="btn btn-default") }}
         </form>
         {% include 'footer.html' %}
     </div>

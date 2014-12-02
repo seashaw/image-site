@@ -57,8 +57,7 @@ class EditPostForm(Form):
     """
     Post creation and editing.
     """
-    #pics = FieldList(FileField('Pics', validators=[Required()]))
-    pics = FileField('Pics', validators=[Required()])
+    pics = FileField('Pics')
     title = TextField('Title', validators=[Required()])
     subtitle = TextField('Subtitle', validators=[Required()])
     body = TextAreaField('Body', validators=[Required()])
@@ -68,4 +67,4 @@ class UploadForm(Form):
     """
     Form for testing uploading capabilities.
     """
-    file = FileField('File', validators=[Required()])
+    files = FileField('Files')

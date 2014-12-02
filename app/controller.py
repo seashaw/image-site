@@ -20,12 +20,32 @@ from .forms import LoginForm, RegisterForm, EditPostForm, UploadForm
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session)
-from flask.ext.login import login_required, login_user, logout_user, current_user
+from flask.ext.login import (login_required, login_user, logout_user,
+        current_user)
 from flask.ext.mail import Message
 from flask.ext.principal import (Identity, AnonymousIdentity, identity_changed,
         Permission, RoleNeed)
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin import expose, BaseView
+
+def idHash(id):
+    """
+    Creates hash from user id.
+    """
+    return hashlib.sha1(str(id).encode()).hexdigest()
+
+def allowedFile(file_name):
+    """
+    Checks file name for allowed extension.
+    """
+
+    # Set of allowed file extensions.
+    extensions = set(["png", "jpg", "jpeg", "gif"])
+
+    # Split file_name from the right at period, check if in extensions set, 
+    # and return.
+    return "." in file_name and file_name.rsplit(".", 1)[1] in extensions
+
 
 """
 Routing functions, controller logic, view redirection.
@@ -38,7 +58,7 @@ def index():
     Greeter page containing information about web application.
     Should link to user registration and login.
     """
-    posts = Post.query.order_by(Post.id).all()
+    posts = db.session.query(Post, User).join(User).order_by(Post.id).all()
     return render_template("index.html", posts=posts)
 
 @app.route("/register", methods=["GET", "POST"])
@@ -59,7 +79,7 @@ def register():
             db.session.commit()
             # URL for user confirmation.
             confirm_url = url_for("confirmUser", user_email=user.email,
-                    id_hash=hashlib.sha1(str(user.id).encode()).hexdigest(),
+                    id_hash=idHash(user.id),
                     _external=True)
             # Create and send confirmation email.
             subject = "Please confirm your account."
@@ -80,11 +100,11 @@ def confirmUser(user_email, id_hash):
     Confirms user account.
     """
     user = User.query.filter_by(email=user_email).first()
-    if hashlib.sha1(str(user.id).encode()).hexdigest() != id_hash:
+    if idHash(user.id) != id_hash:
         return abort(404)
     elif user.confirmed_at is None:
         try:
-            os.mkdir(app.config['UPLOAD_FOLDER'].join(str(user.id)))
+            os.mkdir(app.config['UPLOAD_FOLDER'].join("/", user.id))
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
@@ -108,6 +128,9 @@ def login():
         elif not user.confirmed_at:
             flash("Account requires confirmation.")
             return redirect(url_for("login"))
+        elif not user.active:
+            flash("Account is not active, contact support.")
+            return redirect(url_for("login"))
         else: 
             if bc.check_password_hash(user.password, form.password.data):
                 login_user(user)
@@ -124,6 +147,7 @@ def login():
     return render_template("login.html", form=form)
 
 @app.route("/logout")
+@login_required
 def logout():
     """
     Exit point for logged in users.
@@ -150,24 +174,36 @@ def viewProfile(user_name):
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
+@login_required
 def createPost():
     """
     Creating and posting new blog posts.
     """
     form = EditPostForm()
     if form.validate_on_submit():
-        # Generate list of post pictures.
-        pics = []
-        if form.pics.data:
-            for pic in form.pics.entries:
-                pics.append(pic)
         # Feed form data into post object.
         post = Post(form.title.data, form.subtitle.data, form.body.data,
                 datetime.utcnow(), current_user.id)
-        post.pictures = pics
+
+        db.session.add(post)
+        db.session.flush()
+        
+        # Generate list of post pictures, and save them to file system.
+        if form.pics.data:
+            # Create folder for post uploads.
+            pic_dest = os.path.join("{}/{}/{}".format(
+                    app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+            os.mkdir(pic_dest)
+            pics = request.files.getlist('pics')
+            for pic in pics:
+                if allowedFile(pic.filename):
+                    file_name = secure_filename(pic.filename)
+                    pic.save("{}/{}".format(pic_dest, file_name))
+                    picture = Picture(file_name)
+                    post.pictures.append(picture)
+
         # Add new post object to database.
         try:
-            db.session.add(post)
             db.session.commit()
             return redirect(url_for('index'))
         except Exception as e:
@@ -176,6 +212,7 @@ def createPost():
     return render_template('create-post.html', form=form)
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
+@login_required
 def editPost(post_id):
     """
     Editing existing posts.
@@ -206,16 +243,20 @@ def viewPost(post_id):
     return render_template('view-post.html', post=post)
 
 @app.route('/upload', methods=['GET', 'POST'])
+@login_required
 def upload():
     """
     Test uploading capabilities, don't actually save to database.
     """
     form = UploadForm()
     if form.validate_on_submit:
-        if form.file.data:
-            file = request.files['file']
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], file.filename))
-            return redirect(url_for('show', image_name=file.filename))
+        if form.files.data:
+            files = request.files.getlist('files')
+            for file in files:
+                file.save(os.path.join("{}/{}/{}".format(
+                        app.config["UPLOAD_FOLDER"], current_user.id,
+                        file.filename)))
+            return redirect(url_for('show', image_name=files[0].filename))
     return render_template('upload.html', form=form)
 
 @app.route('/view/<pic_url>')

@@ -6,16 +6,16 @@
                 {% for post in posts %}
                     <div class="blog-post">
                         <h2 class="blog-post-title">
-                            {{ post.title }}
+                            {{ post.Post.title }}
                         </h2>
                         <h4 class="blog-post-subtitle">
-                            {{ post.subtitle }}
+                            {{ post.Post.subtitle }}
                         </h4>
                         <h6 class="blog-post-meta">
-                            published by <a href="{{ url_for('viewProfile', user_name=post.user.user_name) }}">{{ post.user.user_name }}</a> on {{ post.date }}
+                            published by <a href="{{ url_for('viewProfile', user_name=post.User.user_name) }}">{{ post.User.user_name }}</a> on {{ post.Post.posted_at}}
                         </h6>
                         <p>
-                            {{ post.body }}
+                            {{ post.Post.body }}
                         </p>
                     </div> {# end blog-post #}
                 {% endfor %}

@@ -38,14 +38,14 @@ app.config.update(dict(
     MAIL_PORT = 465,
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
-    MAIL_USERNAME = "",
-    MAIL_PASSWORD = "",
+    MAIL_USERNAME = "shaw.colin",
+    MAIL_PASSWORD = "la73ralu5",
     DEFAULT_MAIL_SENDER = "shaw.colin@gmail.com",
 
     ADMINS = ["shaw.colin@gmail.com"],
 
     # Upload settings.
-    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads/'
+    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads'
 ))
 
 # Bcrypt object initialization.

@@ -9,7 +9,11 @@
 }
 
 .navbar-default {
-    background-color: #F46111;
+    background-color: #f46111;
+}
+
+.dropdown-menu {
+    background-color: #f46111;
 }
 
 .navbar-default .navbar-brand {

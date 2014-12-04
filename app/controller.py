@@ -64,7 +64,7 @@ def index():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """
-    Create and set-up new user.
+    Create and set up new user.
     """
     form = RegisterForm()
     if form.validate_on_submit():
@@ -123,10 +123,10 @@ def login():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash('No account for "{}"'.format(email))
+            flash("No account for '{}'".format(email))
             return redirect(url_for("login"))
         elif not user.confirmed_at:
-            flash("Account requires confirmation.")
+            flash("confirmation.")
             return redirect(url_for("login"))
         elif not user.active:
             flash("Account is not active, contact support.")
@@ -134,11 +134,9 @@ def login():
         else: 
             if bc.check_password_hash(user.password, form.password.data):
                 login_user(user)
-
                 # Signal Principal that identity changed.
                 identity_changed.send(current_app._get_current_object(),
                         identity=Identity(user.id))
-
                 flash("Login successful.")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
@@ -152,16 +150,14 @@ def logout():
     """
     Exit point for logged in users.
     """
+    # Log out user.
     logout_user()
-
     # Remove session keys set by Principal.
-    for key in ('identity.name', 'identity.auth_type'):
+    for key in ("identity.name", "identity.auth_type"):
         session.pop(key, None)
-    
     # Signal Principal that identity changed.
     identity_changed.send(current_app._get_current_object(),
             identity=AnonymousIdentity())
-
     flash("Logout successful.")
     return redirect(url_for("login"))
 
@@ -177,32 +173,34 @@ def viewProfile(user_name):
 @login_required
 def createPost():
     """
-    Creating and posting new blog posts.
+    Create, save, and post new entries.
     """
     form = EditPostForm()
     if form.validate_on_submit():
         # Feed form data into post object.
         post = Post(form.title.data, form.subtitle.data, form.body.data,
                 datetime.utcnow(), current_user.id)
-
+        # Add post to session and flush to update post object.
         db.session.add(post)
         db.session.flush()
-        
-        # Generate list of post pictures, and save them to file system.
+        # Check submitted form if any files have been loaded.
         if form.pics.data:
-            # Create folder for post uploads.
+            # Generate path for post uploads.
             pic_dest = os.path.join("{}/{}/{}".format(
                     app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+            # Create post directory on file system.
             os.mkdir(pic_dest)
+            # Get list of upload files.
             pics = request.files.getlist('pics')
             for pic in pics:
                 if allowedFile(pic.filename):
+                    # Secure file name, save file to system and append file
+                    # name to post object pictures list.
                     file_name = secure_filename(pic.filename)
                     pic.save("{}/{}".format(pic_dest, file_name))
                     picture = Picture(file_name)
                     post.pictures.append(picture)
-
-        # Add new post object to database.
+        # Add post object to database.
         try:
             db.session.commit()
             return redirect(url_for('index'))
@@ -234,45 +232,14 @@ def editPost(post_id):
         flash('You lack editing rights for this post.')
         return redirect(url_for('index'))
 
-@app.route('/post/<post_id>', methods=["GET", "POST"])
+@app.route('/view/<post_id>', methods=["GET", "POST"])
 def viewPost(post_id):
     """
     View an individual post.
     """
-    post = Post.query.get(post_id)
+    post = db.session.query(Post, User.user_name).filter_by(
+            id=post_id).join(User).first()
     return render_template('view-post.html', post=post)
-
-@app.route('/upload', methods=['GET', 'POST'])
-@login_required
-def upload():
-    """
-    Test uploading capabilities, don't actually save to database.
-    """
-    form = UploadForm()
-    if form.validate_on_submit:
-        if form.files.data:
-            files = request.files.getlist('files')
-            for file in files:
-                file.save(os.path.join("{}/{}/{}".format(
-                        app.config["UPLOAD_FOLDER"], current_user.id,
-                        file.filename)))
-            return redirect(url_for('show', image_name=files[0].filename))
-    return render_template('upload.html', form=form)
-
-@app.route('/view/<pic_url>')
-def view(pic_url):
-    """
-    Test endpoint to view uploaded image.
-    """
-    file_url = url_for('static', filename='uploads/{}'.format(pic_url))
-    return render_template('view.html', file_url=file_url)
-
-@app.route('/show/<image_name>')
-def show(image_name):
-    """
-    Show file upload name.
-    """
-    return "File Name: {}".format(image_name)
 
 """
 Administrative views.

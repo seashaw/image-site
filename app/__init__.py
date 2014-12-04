@@ -31,21 +31,23 @@ app.config.update(dict(
     SECRET_KEY = "In development.",
     #SERVER_NAME = "www.angryhos.com",
     SERVER_NAME = 'localhost:8080',
+    # Remove DEBUG line for production.
     DEBUG = True,
 
     # Mail settings.
-    MAIL_SERVER = "smtp.googlemail.com",
+    MAIL_SERVER = "smtp.zoho.com",
     MAIL_PORT = 465,
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
-    MAIL_USERNAME = "shaw.colin",
-    MAIL_PASSWORD = "la73ralu5",
-    DEFAULT_MAIL_SENDER = "shaw.colin@gmail.com",
+    MAIL_USERNAME = "administrator@angryhos.com",
+    MAIL_PASSWORD = "angryhoszoho",
+    DEFAULT_MAIL_SENDER = "administrator@angryhos.com",
 
-    ADMINS = ["shaw.colin@gmail.com"],
+    ADMINS = ["administrator@angryhos.com"],
 
     # Upload settings.
-    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads'
+    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads',
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024 # 5MB
 ))
 
 # Bcrypt object initialization.

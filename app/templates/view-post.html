@@ -5,15 +5,24 @@
 </head>
 {% block body %}
     <h3>
-        {{ post.title }}
+        {{ post.Post.title }}
     </h3>
     <h4>
-        {{ post.subtitle }}
+        {{ post.Post.subtitle }}
     </h4>
     <h5>
-        published by {{ post.user.user_name }} on {{ post.date }}
+        published by {{ post.user_name }} on {{ post.Post.posted_at }}
     </h5>
+    {% if post.Post.pictures %}
+        {% for picture in post.Post.pictures %}
+            <img class="img-responsive img-rounded"
+                    alt="{{ picture.id }}"
+                    src="{{ '/static/uploads/{}/{}/{}'.format(
+                            post.Post.user_id, post.Post.id,
+                            picture.filename) }}">
+        {% endfor %}
+    {% endif %}
     <p>
-        {{ post.body }}
+        {{ post.Post.body }}
     </p>
 {% endblock %}

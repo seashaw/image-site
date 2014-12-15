@@ -14,13 +14,6 @@
                         <h4 class="blog-post-subtitle">
                             {{ post.Post.subtitle }}
                         </h4>
-                        {% if post.Post.pictures %}
-                            <img src="{{ '/static/uploads/{}/{}/{}'.format(
-                                    post.Post.user_id, post.Post.id,
-                                    post.Post.pictures[0].filename) }}"
-                                class="img-responsive img-rounded"
-                                alt="Post cover.">
-                        {% endif %}
                         <h6 class="blog-post-meta">
                             published by 
                                 <a href="{{ url_for('viewProfile',
@@ -29,6 +22,13 @@
                                 </a> 
                             at {{ post.Post.posted_at }}
                         </h6>
+                        {% if post.Post.pictures %}
+                            <img src="{{ '/static/uploads/{}/{}/{}'.format(
+                                    post.Post.user_id, post.Post.id,
+                                    post.Post.pictures[0].filename) }}"
+                                class="img-responsive img-rounded"
+                                alt="Post cover.">
+                        {% endif %}
                         <p>
                             {{ post.Post.body }}
                         </p>

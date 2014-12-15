@@ -1,7 +1,8 @@
 """
 File: forms.py
 Created: 2014-11-14 - C.Shaw <shaw.colin@gmail.com>
-Description: Forms and custom validators for form fields.
+Description: 
+    Forms and custom validators for form fields.
 """
 from . model import User
 from flask.ext.wtf import Form
@@ -55,16 +56,10 @@ class RegisterForm(Form):
 
 class EditPostForm(Form):
     """
-    Post creation and editing.
+    Post creation.
     """
     pics = FileField('Pics')
     title = TextField('Title', validators=[Required()])
     subtitle = TextField('Subtitle', validators=[Required()])
     body = TextAreaField('Body', validators=[Required()])
     submit = SubmitField("Post")
-
-class UploadForm(Form):
-    """
-    Form for testing uploading capabilities.
-    """
-    files = FileField('Files')

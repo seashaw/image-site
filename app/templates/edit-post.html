@@ -13,13 +13,32 @@
             {% endfor %}
         </ul>
     {% endif %}
+    
+    {% for pic in post.pictures %}
+        <img src="{{ '/static/uploads/{}/{}/{}'.format(current_user.id,
+                post.id, pic.filename) }}" class="img-reponsive img-rounded"
+            alt="{{ '{}'.format(pic.filename) }}">
+    {% endfor %}
 
-    <form action="/edit/{{ post_id }}" method=post accept-charset="utf-8">
+    <form action="/edit/{{ post.id }}" method=post enctype="multipart/form-data" accept-charset="utf-8">
         {{ form.hidden_tag() }}
-        {{ form.title.label }} {{ form.title(size=80) }} <br>
-        {{ form.subtitle.label }} {{ form.subtitle(size=80) }}<br>
-        {{ form.body.label }} {{ form.body() }}<br>
-    <p>{{ form.submit }}</p>
+        <div class="form-group">
+            {{ form.pics.label }}
+            {{ form.pics(multiple="") }}
+        </div>
+        <div class="form-group">
+            {{ form.title.label }}
+            {{ form.title(class_="form-control", size=40) }}
+        </div>
+        <div class="form-group">
+            {{ form.subtitle.label }}
+            {{ form.subtitle(class_="form-control", size=40) }}
+        </div>
+        <div class="form-group">
+            {{ form.body.label }}
+            {{ form.body(class_="form-control") }}
+        </div>
+        {{ form.submit(class_="btn btn-default") }}
     </form>
-
+    {% include 'footer.html' %}
 {% endblock %}

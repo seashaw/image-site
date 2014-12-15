@@ -16,7 +16,7 @@ from pytz import timezone
 
 from . import app, bc, mail, db, EditBlogPostPermission
 from .model import User, Post, Picture
-from .forms import LoginForm, RegisterForm, EditPostForm, UploadForm
+from .forms import LoginForm, RegisterForm, EditPostForm
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session)
@@ -26,7 +26,8 @@ from flask.ext.mail import Message
 from flask.ext.principal import (Identity, AnonymousIdentity, identity_changed,
         Permission, RoleNeed)
 from flask.ext.admin.contrib.sqla import ModelView
-from flask.ext.admin import expose, BaseView
+from flask.ext.admin.contrib.fileadmin import FileAdmin
+from flask.ext.admin import expose, BaseView, AdminIndexView
 
 def idHash(id):
     """
@@ -87,10 +88,10 @@ def register():
                     confirm_url)
             msg = Message(subject=subject, recipients=[user.email], html=html)
             mail.send(msg)
-            flash("Confirmation email sent.")
+            flash("Confirmation email sent.", "info")
             return redirect(request.args.get("next") or url_for("login"))
         except Exception as e:
-            flash("Registration failed.")
+            flash("Registration failed.", "danger")
             return redirect(url_for("login"))
     return render_template("register.html", form=form)
 
@@ -108,12 +109,13 @@ def confirmUser(user_email, id_hash):
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
-            flash("Account confirmation successful.")
+            flash("Account confirmation successful.", "success")
         except Exception as e:
-            flash("Account confirmation failed.")
+            flash("Account confirmation failed.", "danger")
             return redirect(url_for('register'))
     else:
-        flash("Account already confirmed.")
+        flash("Account already confirmed.", "warning")
+        return redirect(url_for("login"))
     return redirect(url_for("index"))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -123,13 +125,14 @@ def login():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash("No account for '{}'".format(email))
+            flash("No account for '{}'".format(email), "danger")
             return redirect(url_for("login"))
         elif not user.confirmed_at:
-            flash("confirmation.")
+            flash(("Account is not yet confirmed.  "
+                "Check your email for a confirmation link."), "danger")
             return redirect(url_for("login"))
         elif not user.active:
-            flash("Account is not active, contact support.")
+            flash("Account is not active, contact support.", "danger")
             return redirect(url_for("login"))
         else: 
             if bc.check_password_hash(user.password, form.password.data):
@@ -137,10 +140,10 @@ def login():
                 # Signal Principal that identity changed.
                 identity_changed.send(current_app._get_current_object(),
                         identity=Identity(user.id))
-                flash("Login successful.")
+                flash("Login successful.", "success")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
-                flash("Wrong password.")
+                flash("Wrong password.", "danger")
                 return redirect(url_for("login"))
     return render_template("login.html", form=form)
 
@@ -158,7 +161,7 @@ def logout():
     # Signal Principal that identity changed.
     identity_changed.send(current_app._get_current_object(),
             identity=AnonymousIdentity())
-    flash("Logout successful.")
+    flash("Logout successful.", "success")
     return redirect(url_for("login"))
 
 @app.route('/users/<user_name>')
@@ -205,9 +208,19 @@ def createPost():
             db.session.commit()
             return redirect(url_for('index'))
         except Exception as e:
-            flash("Post creation failed.")
+            flash("Post creation failed.", "danger")
             return redirect(url_for("createPost"))
     return render_template('create-post.html', form=form)
+
+@app.route('/edit')
+@login_required
+def userPosts():
+    """
+    Lists user posts.
+    """
+    posts = Post.query.filter_by(user_id=current_user.id).order_by(
+            Post.id).all()
+    return render_template("user-posts.html", posts=posts)
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
 @login_required
@@ -224,13 +237,26 @@ def editPost(post_id):
             form.subtitle.data = post.subtitle
             form.body.data = post.body
         if form.validate_on_submit():
+            if form.pics.data:
+                pic_dest = os.path.join("{}/{}/{}".format(
+                    app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+                pics = request.files.getlist('pics')
+                for pic in pics:
+                    if allowedFile(pic.filename):
+                        # Secure file name, save file to system and append
+                        # file to post object pictures list.
+                        file_name = secure_filename(pic.filename)
+                        pic.save("{}/{}".format(pic_dest, file_name))
+                        picture = Picture(file_name)
+                        post.pictures.append(picture)
             form.populate_obj(post)
             db.session.commit()
-            return redirect(url_for('index'))
-        return render_template('edit-post.html', form=form, post_id=post.id)
+            flash("Post changes have been saved.", "sucess")
+            return redirect(url_for('editPost', post_id=post.id))
+        return render_template('edit-post.html', form=form, post=post)
     else:
-        flash('You lack editing rights for this post.')
-        return redirect(url_for('index'))
+        flash("You lack editing rights for this post.", "danger")
+        return redirect(url_for('userPosts'))
 
 @app.route('/view/<post_id>', methods=["GET", "POST"])
 def viewPost(post_id):
@@ -240,58 +266,3 @@ def viewPost(post_id):
     post = db.session.query(Post, User.user_name).filter_by(
             id=post_id).join(User).first()
     return render_template('view-post.html', post=post)
-
-"""
-Administrative views.
-"""
-
-class HomeView(BaseView):
-    """
-    Index view route for administration.
-    """
-    def is_accessible(self):
-        """
-        Restrict access to authenticated users.
-        """
-        admin_permission = Permission(RoleNeed('Administrator'))
-        return admin_permission.can()
-
-    @expose('/')
-    def index(self):
-        return self.render('admin/index.html') # Do I need to create this view?
-
-class UsersView(ModelView):
-    """
-    Admin view for user management.
-    """
-
-    def is_accessible(self):
-        """
-        Restrict access to authenticated users.
-        """
-        admin_permission = Permission(RoleNeed('Administrator'))
-        return admin_permission.can()
-
-class RolesView(ModelView):
-    """
-    Admin view for role management.
-    """
-
-    def is_accessible(self):
-        """
-        Restrict access to authenticated users.
-        """
-        admin_permission = Permission(RoleNeed('Administrator'))
-        return admin_permission.can()
-
-class PostsView(ModelView):
-    """
-    Admin view for post management.
-    """
-
-    def is_accessible(self):
-        """
-        Restrict access to authenticated users.
-        """
-        admin_permission = Permission(RoleNeed('Administrator'))
-        return admin_permission.can()

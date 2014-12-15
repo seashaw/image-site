@@ -19,6 +19,7 @@ from flask.ext.login import LoginManager, current_user
 from flask.ext.principal import (Principal, identity_loaded, Permission,
         RoleNeed, UserNeed)
 from flask.ext.admin import Admin
+from flask.ext.admin.contrib.fileadmin import FileAdmin
 
 # Initialize the application.
 app = Flask(__name__)
@@ -63,11 +64,11 @@ principal = Principal(app)
 # Mail object initialization.
 mail = Mail(app)
 
-# SQLAlchemy object initialization..
+# SQLAlchemy object initialization.
 db = SQLAlchemy(app)
 
-# Object tracker model import.
-from .model import User, Role, Post
+# Model class imports.
+from .model import User, Role, Post, Picture
 
 # User loader callback for LoginManager.
 @lm.user_loader
@@ -89,12 +90,12 @@ class EditBlogPostPermission(Permission):
     Permission definition for editing blog posts.
     """
     def __init__(self, post_id):
-        need = EditBlogPostNeed(post_id)
+        need = EditBlogPostNeed(str(post_id))
         super(EditBlogPostPermission, self).__init__(need)
 
 # User information provider for Principal.
 @identity_loaded.connect_via(app)
-def onIdentityLoad(sender, identity):
+def onIdentityLoaded(sender, identity):
     """
     Connects to the identity-loaded signal to add additional information to
     the Identity instance, like user roles.
@@ -104,7 +105,7 @@ def onIdentityLoad(sender, identity):
 
     # Add UserNeed to the identity.
     if hasattr(current_user, 'id'):
-        identity.provides.add(UserNeed(current_user.id))
+        identity.provides.add(UserNeed(str(current_user.id)))
 
     # Update identity with list of roles that User provides.
     # Refers to relationship 'roles' from User model.
@@ -116,14 +117,21 @@ def onIdentityLoad(sender, identity):
     # Refers to relationship 'posts' from User model.
     if hasattr(current_user, 'posts'):
         for post in current_user.posts:
-            identity.provides.add(EditBlogPostNeed(post.id))
+            identity.provides.add(EditBlogPostNeed(str(post.id)))
 
-# Object tracker controller import.
-from .controller import HomeView, UsersView, RolesView, PostsView
+# Controller import.
+from . import controller
+
+# Admin view import.
+from .admin import (HomeView, UsersView, RolesView, PostsView, PicturesView,
+        FileView)
 
 # Admin object initialization.
-admin = Admin(app, index_view=HomeView(url='/admin'))
+admin = Admin(app, index_view=HomeView(), name="Angry Hos")
 
 admin.add_view(UsersView(User, db.session, name='Users'))
 admin.add_view(RolesView(Role, db.session, name='Roles'))
 admin.add_view(PostsView(Post, db.session, name='Posts'))
+admin.add_view(PicturesView(Picture, db.session, name='Pictures'))
+admin.add_view(FileView(app.config["UPLOAD_FOLDER"], '/static/uploads/',
+        name="Uploaded Files"))

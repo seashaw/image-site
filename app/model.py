@@ -41,7 +41,7 @@ class User(db.Model, UserMixin):
 
     roles = db.relationship('Role', secondary=user_roles,
             backref=db.backref('users', lazy='dynamic'))
-    posts = db.relationship('Post', backref='users')
+    posts = db.relationship('Post', backref='users', order_by="Post.id")
 
     def __init__(self, email='', password='', active=False, first_name='',
             last_name='', user_name='', roles=[], posts=[]):
@@ -105,7 +105,7 @@ class Picture(db.Model):
     filename = db.Column(db.String(80))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     
-    def __init__(self, filename):
+    def __init__(self, filename=''):
         self.filename = filename
 
     def __repr__(self):

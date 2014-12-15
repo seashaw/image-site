@@ -1,17 +1,29 @@
 {% extends "base.html" %}
 {% block body %}
 
+    
     {# Form error notifications. #}
     {% if form.errors %}
-        <ul class="errors">
-            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                    <li>
-                        {{ form[field_name].label }}: {{ error }}
-                    </li>
+        <div class="container">
+                {% for field_name, field_errors in form.errors|dictsort
+                        if field_errors %}
+                    {% for error in field_errors %}
+                        <div class="alert alert-danger alert-dismissable"
+                                role="alert">
+                            <button type="button" class="close"
+                                    data-dismiss="alert">
+                                <span class="glyphicon glyphicon-remove"
+                                        aria-hidden="true">
+                                </span>
+                                <span class="sr-only">
+                                    Dismiss
+                                </span>
+                            </button>
+                            {{ form[field_name].label }}: {{ error }}
+                        </div> {# end alert #}
+                    {% endfor %}
                 {% endfor %}
-            {% endfor %}
-        </ul>
+        </div> {# end container #}
     {% endif %}
     
     {% for pic in post.pictures %}
@@ -20,7 +32,8 @@
             alt="{{ '{}'.format(pic.filename) }}">
     {% endfor %}
 
-    <form action="/edit/{{ post.id }}" method=post enctype="multipart/form-data" accept-charset="utf-8">
+    <form action="/edit/{{ post.id }}" method=post
+            enctype="multipart/form-data" accept-charset="utf-8">
         {{ form.hidden_tag() }}
         <div class="form-group">
             {{ form.pics.label }}

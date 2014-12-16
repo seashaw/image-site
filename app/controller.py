@@ -16,7 +16,7 @@ from pytz import timezone
 
 from . import app, bc, mail, db, EditBlogPostPermission
 from .model import User, Post, Picture
-from .forms import LoginForm, RegisterForm, EditPostForm
+from .forms import LoginForm, RegisterForm, CreatePostForm,  EditPostForm
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session)
@@ -86,7 +86,8 @@ def register():
             subject = "Please confirm your account."
             html = "Click <a href='{}'>here</a> to confirm.".format(
                     confirm_url)
-            msg = Message(subject=subject, recipients=[user.email], html=html)
+            msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
+                    recipients=[user.email], html=html)
             mail.send(msg)
             flash("Confirmation email sent.", "info")
             return redirect(request.args.get("next") or url_for("login"))
@@ -105,7 +106,7 @@ def confirmUser(user_email, id_hash):
         return abort(404)
     elif user.confirmed_at is None:
         try:
-            os.mkdir(app.config['UPLOAD_FOLDER'].join("/", user.id))
+            os.mkdir("{}/{}".format(app.config['UPLOAD_FOLDER'], user.id))
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
@@ -125,14 +126,14 @@ def login():
         email = form.email.data
         user = User.query.filter_by(email=email).first()
         if user is None:
-            flash("No account for '{}'".format(email), "danger")
+            flash("No account for '{}'".format(email), "warning")
             return redirect(url_for("login"))
         elif not user.confirmed_at:
             flash(("Account is not yet confirmed.  "
-                "Check your email for a confirmation link."), "danger")
+                "Check your email for a confirmation link."), "warning")
             return redirect(url_for("login"))
         elif not user.active:
-            flash("Account is not active, contact support.", "danger")
+            flash("Account is not active, contact support.", "warning")
             return redirect(url_for("login"))
         else: 
             if bc.check_password_hash(user.password, form.password.data):
@@ -178,7 +179,7 @@ def createPost():
     """
     Create, save, and post new entries.
     """
-    form = EditPostForm()
+    form = CreatePostForm()
     if form.validate_on_submit():
         # Feed form data into post object.
         post = Post(form.title.data, form.subtitle.data, form.body.data,
@@ -239,7 +240,7 @@ def editPost(post_id):
         if form.validate_on_submit():
             if form.pics.data:
                 pic_dest = os.path.join("{}/{}/{}".format(
-                    app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+                        app.config["UPLOAD_FOLDER"], current_user.id, post.id))
                 pics = request.files.getlist('pics')
                 for pic in pics:
                     if allowedFile(pic.filename):
@@ -263,6 +264,6 @@ def viewPost(post_id):
     """
     View an individual post.
     """
-    post = db.session.query(Post, User.user_name).filter_by(
-            id=post_id).join(User).first()
+    post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
+            User).first()
     return render_template('view-post.html', post=post)

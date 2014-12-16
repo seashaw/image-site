@@ -40,11 +40,10 @@ app.config.update(dict(
     MAIL_PORT = 465,
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
-    MAIL_USERNAME = "administrator@angryhos.com",
+    MAIL_USERNAME = "noreply@angryhos.com",
     MAIL_PASSWORD = "angryhoszoho",
-    DEFAULT_MAIL_SENDER = "administrator@angryhos.com",
 
-    ADMINS = ["administrator@angryhos.com"],
+    ADMIN_EMAIL = "administrator@angryhos.com",
 
     # Upload settings.
     UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads',

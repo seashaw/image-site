@@ -54,7 +54,7 @@ class RegisterForm(Form):
     confirm = PasswordField("Confirm Password")
     submit = SubmitField("Register")
 
-class EditPostForm(Form):
+class CreatePostForm(Form):
     """
     Post creation.
     """
@@ -63,3 +63,9 @@ class EditPostForm(Form):
     subtitle = TextField('Subtitle', validators=[Required()])
     body = TextAreaField('Body', validators=[Required()])
     submit = SubmitField("Post")
+
+class EditPostForm(CreatePostForm):
+    """
+    Post editing and updating.
+    """
+    submit = SubmitField("Update")

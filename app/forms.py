@@ -58,7 +58,7 @@ class CreatePostForm(Form):
     """
     Post creation.
     """
-    pics = FileField('Pics')
+    pics = FileField('Add Pictures')
     title = TextField('Title', validators=[Required()])
     subtitle = TextField('Subtitle', validators=[Required()])
     body = TextAreaField('Body', validators=[Required()])

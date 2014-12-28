@@ -80,7 +80,7 @@ class Post(db.Model):
     title = db.Column(db.String(80), unique=True)
     subtitle = db.Column(db.String(80))
     body = db.Column(db.Text)
-    posted_at = db.Column(db.DateTime(timezone=True))
+    posted_at = db.Column(db.DateTime()) # All datetime entries should be UTC.
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     pictures = db.relationship('Picture', backref='posts')

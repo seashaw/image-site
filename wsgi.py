@@ -9,5 +9,5 @@ Description:
 
 from app import app
 if __name__ == '__main__':
-    app.config['SERVER_NAME'] = 'localhost:5000'
+    app.config['SERVER_NAME'] = 'localhost:8080'
     app.run(debug=True)

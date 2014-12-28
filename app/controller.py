@@ -33,6 +33,8 @@ def idHash(id):
     """
     Creates hash from user id.
     """
+    # Using very simple hashing method.
+    # Should I switch to something more robust?
     return hashlib.sha1(str(id).encode()).hexdigest()
 
 def allowedFile(file_name):
@@ -106,7 +108,9 @@ def confirmUser(user_email, id_hash):
         return abort(404)
     elif user.confirmed_at is None:
         try:
-            os.mkdir("{}/{}".format(app.config['UPLOAD_FOLDER'], user.id))
+            path = "{}/{}".format(app.config['UPLOAD_FOLDER'], user.id) 
+            os.mkdir(path)
+            os.chmod(path, mode=0o007)
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
@@ -194,6 +198,7 @@ def createPost():
                     app.config["UPLOAD_FOLDER"], current_user.id, post.id))
             # Create post directory on file system.
             os.mkdir(pic_dest)
+            os.chmod(pic_dest, mode=0o007)
             # Get list of upload files.
             pics = request.files.getlist('pics')
             for pic in pics:
@@ -267,3 +272,11 @@ def viewPost(post_id):
     post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
             User).first()
     return render_template('view-post.html', post=post)
+
+@app.route('/gallerytest')
+def galleryTest():
+    """
+    Endpoint for testing gallery configurations.
+    """
+    post = Post.query.first()
+    return render_template("gallery-test.html", post=post)

@@ -13,6 +13,7 @@ import hashlib
 from datetime import datetime
 import pytz
 from pytz import timezone
+from PIL import Image
 
 from . import app, bc, mail, db, EditBlogPostPermission
 from .model import User, Post, Picture
@@ -110,7 +111,7 @@ def confirmUser(user_email, id_hash):
         try:
             path = "{}/{}".format(app.config['UPLOAD_FOLDER'], user.id) 
             os.mkdir(path)
-            os.chmod(path, mode=0o007)
+            os.chmod(path, mode=0o777)
             user.confirmed_at = datetime.utcnow()
             user.active = True
             db.session.commit()
@@ -198,15 +199,26 @@ def createPost():
                     app.config["UPLOAD_FOLDER"], current_user.id, post.id))
             # Create post directory on file system.
             os.mkdir(pic_dest)
-            os.chmod(pic_dest, mode=0o007)
+            os.chmod(pic_dest, mode=0o777)
+            # Path and size of thumbnails.
+            thumb_dest = "{}/{}".format(pic_dest, "thumbnails")
+            thumb_size = (256, 256)
+            # Create directory for thumbnails.
+            os.mkdir(thumb_dest)
+            os.chmod(thumb_dest, mode=0o777)
             # Get list of upload files.
             pics = request.files.getlist('pics')
             for pic in pics:
                 if allowedFile(pic.filename):
-                    # Secure file name, save file to system and append file
-                    # name to post object pictures list.
+                    # Secure filename and save picture.
                     file_name = secure_filename(pic.filename)
                     pic.save("{}/{}".format(pic_dest, file_name))
+                    # Create and save thumbnail.
+                    thumb = Image.open(file_name)
+                    thumb.thumbnail(thumb_size)
+                    thumb.save("{}/{}".format(thumb_dest, file_name),
+                            thumb.format)
+                    # Create Picture model object and add to list in post.
                     picture = Picture(file_name)
                     post.pictures.append(picture)
         # Add post object to database.

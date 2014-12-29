@@ -1,57 +1,60 @@
 {% extends 'base.html' %}
 {% block body %}
-
-<h3>
-  {{ post.Post.title }}
-</h3>
-
-{% if post.Post.pictures %}
-  {# Gallery widget. #}
-  <div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls">
-    <div class="slides"></div>
-    <h3 class="title"></h3>
-    <a class="prev">‹</a>
-    <a class="next">›</a>
-    <a class="close">×</a>
-    <a class="play-pause"></a>
-    <ol class="indicator"></ol>
-  </div>
-
-  {# Gallery picture thumbnails and links. #}
-  <div id="links" class="links">
-    {% for pic in post.Post.pictures %}
-      <a href="../static/uploads/{{ '{}/{}/{}'.format(post.Post.user_id,
-          post.Post.id, pic.filename) }}" title="{{ pic.filename }}">
-        <img src="../static/uploads/{{ '{}/{}/{}'.format(post.Post.user_id,
-            post.Post.id, pic.filename) }}" alt="{{ pic.filename }}">
-      </a>
-    {% endfor %}
-  </div>
-{% endif %}
-
-<div class="container">
-  <div class="row">
-    <h4>
-      {{ post.Post.subtitle }}
-    </h4>
-    <h7>
-      published by {{ post.user_name }} on {{ post.Post.posted_at }}
-    </h7>
-    <p>
-      {{ post.Post.body }}
-    </p>
-  </div> {# end row #}
-</div> {# end container #}
-
-{# Footer import. #}
-{% include 'footer.html' %}
-
-{# JavaScript imports. #}
-{# Gallery import. #}
-<script type="text/javascript" charset="utf-8"
-    src="../static/js/blueimp-gallery.js"></script>
-{# Custom JavaScript import. #}
-<script type="text/javascript" charset="utf-8"
-    src="../static/js/view-post.js"></script>
-
+  <div class="container">
+    <div class="row">
+      <h3>
+        {{ post.Post.title }}
+      </h3>
+    </div> {# end row #}
+    <div class="row">
+      {% if post.Post.pictures %}
+        {# Gallery widget. #}
+        <div id="blueimp-gallery"
+            class="blueimp-gallery blueimp-gallery-controls">
+          <div class="slides"></div>
+          <h3 class="title"></h3>
+          <a class="prev">‹</a>
+          <a class="next">›</a>
+          <a class="close">×</a>
+          <a class="play-pause"></a>
+          <ol class="indicator"></ol>
+        </div>
+        {# Gallery picture thumbnails and links. #}
+        <div id="links" class="links">
+          {% for pic in post.Post.pictures %}
+            <div class="col-xs-6">
+              <a href="../static/uploads/{{ '{}/{}/{}'.format(
+                  post.Post.user_id, post.Post.id, pic.filename) }}"
+                  title="test" class="thumbnail">
+                <img src="../static/uploads/{{ '{}/{}/thumbnails/{}'.format(
+                    post.Post.user_id, post.Post.id, pic.filename) }}"
+                    alt="{{ pic.filename }}"
+                    class="img-responsive img-rounded">
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div> {# end row #}
+    <div class="row">
+      <h4>
+        {{ post.Post.subtitle }}
+      </h4>
+      <h7>
+        published by {{ post.user_name }} on {{ post.Post.posted_at }}
+      </h7>
+      <p>
+        {{ post.Post.body }}
+      </p>
+    </div> {# end row #}
+  </div> {# end container #}
+  {# Footer import. #}
+  {% include 'footer.html' %}
+  {# JavaScript imports. #}
+  {# Gallery import. #}
+  <script type="text/javascript" charset="utf-8"
+      src="../static/js/blueimp-gallery.js"></script>
+  {# Custom JavaScript import. #}
+  <script type="text/javascript" charset="utf-8"
+      src="../static/js/view-post.js"></script>
 {% endblock %}

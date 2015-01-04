@@ -103,10 +103,12 @@ class Picture(db.Model):
     __tablename__ = 'pictures'
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(80))
+    caption = db.Column(db.String(80))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
     
-    def __init__(self, filename=''):
+    def __init__(self, filename='', caption=filename):
         self.filename = filename
+        self.caption = caption
 
     def __repr__(self):
         return '<id: {} filename: {}>'.format(self.id, self.filename)

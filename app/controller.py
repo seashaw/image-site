@@ -30,6 +30,10 @@ from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.contrib.fileadmin import FileAdmin
 from flask.ext.admin import expose, BaseView, AdminIndexView
 
+"""
+Helper functions.
+"""
+
 def idHash(id):
     """
     Creates hash from user id.
@@ -55,15 +59,16 @@ def allowedFile(file_name):
 Routing functions, controller logic, view redirection.
 """
 
-@app.route("/")
-@app.route("/index")
-def index():
+@app.route("/", defaults={"page": 1})
+@app.route("/index/<int:page>")
+def index(page):
     """
     Greeter page containing information about web application.
     Should link to user registration and login.
     """
-    posts = db.session.query(Post, User).join(User).order_by(Post.id).all()
-    return render_template("index.html", posts=posts)
+    posts = db.session.query(Post, User).join(User).order_by(
+            Post.id.desc()).all()
+    return render_template("index.html", posts=posts, page=page)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -214,14 +219,14 @@ def createPost():
                     file_name = secure_filename(pic.filename)
                     pic.save("{}/{}".format(pic_dest, file_name))
                     # Create and save thumbnail.
-                    thumb = Image.open(file_name)
+                    thumb = Image.open("{}/{}".format(pic_dest, file_name))
                     thumb.thumbnail(thumb_size)
                     thumb.save("{}/{}".format(thumb_dest, file_name),
                             thumb.format)
                     # Create Picture model object and add to list in post.
                     picture = Picture(file_name)
                     post.pictures.append(picture)
-        # Add post object to database.
+        # Commit changes to database.
         try:
             db.session.commit()
             return redirect(url_for('index'))

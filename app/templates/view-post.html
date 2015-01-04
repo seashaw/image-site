@@ -1,9 +1,15 @@
 {% extends 'base.html' %}
 {% block body %}
+  {# Custom CSS #}
+  <link rel="stylesheet" href="../static/css/view-post.css" type="text/css">
   <div class="container">
     <div class="row">
       <h3>
         {{ post.Post.title }}
+        <span>
+          published by {{ post.user_name }} on 
+          {{ post.Post.posted_at.strftime("%a, %b %d, %Y at %I:%M%p") }}
+        </span>
       </h3>
     </div> {# end row #}
     <div class="row">
@@ -22,7 +28,7 @@
         {# Gallery picture thumbnails and links. #}
         <div id="links" class="links">
           {% for pic in post.Post.pictures %}
-            <div class="col-xs-6">
+            <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
               <a href="../static/uploads/{{ '{}/{}/{}'.format(
                   post.Post.user_id, post.Post.id, pic.filename) }}"
                   title="test" class="thumbnail">
@@ -40,9 +46,6 @@
       <h4>
         {{ post.Post.subtitle }}
       </h4>
-      <h7>
-        published by {{ post.user_name }} on {{ post.Post.posted_at }}
-      </h7>
       <p>
         {{ post.Post.body }}
       </p>

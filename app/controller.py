@@ -60,15 +60,33 @@ Routing functions, controller logic, view redirection.
 """
 
 @app.route("/", defaults={"page": 1})
+@app.route('/index/', defaults={"page": 1})
 @app.route("/index/<int:page>")
 def index(page):
     """
-    Greeter page containing information about web application.
-    Should link to user registration and login.
+    Application index, contains list of recent posts.
     """
-    posts = db.session.query(Post, User).join(User).order_by(
-            Post.id.desc()).all()
-    return render_template("index.html", posts=posts, page=page)
+    # This is just bad design overall.
+    posts_per_page = 10
+    results = db.session.query(Post, User).join(User).order_by(
+            Post.id.desc()).limit(page * posts_per_page).all()
+    posts = []
+    if results:
+        end = True
+    else:
+        end = False
+    if page - 1 == 0:
+        i = 0
+    else:
+        i = (page - 1) * posts_per_page
+    while i < (page * posts_per_page):
+        if len(results) == i:
+            end = True
+            break
+        else:
+            posts.append(results[i])
+            i += 1
+    return render_template("index.html", posts=posts, page=page, end=end)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

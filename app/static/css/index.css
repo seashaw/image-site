@@ -1,0 +1,22 @@
+h3 p {
+  font-size-adjust: 0.3;
+  text-align: right;
+}
+
+/* Bootstrap Media queries. */
+
+/* xs */
+@media(max-width:767px) {
+}
+
+/* sm */
+@media(min-width:768px) {
+}
+
+/* md */
+@media(min-width:992px) {
+}
+
+/* lg */
+@media(min-width:1200px) {
+}

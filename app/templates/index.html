@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block body %}
   {# Custom CSS #}
-  <link rel="stylesheet" href="../static/css/index.css" type="text/css">
+  <link rel="stylesheet" href="/static/css/index.css" type="text/css">
   <div class="container">
     <div class="row">
       <div class="col-xs-9">
@@ -43,6 +43,55 @@
             class="img-responsive">
       </div>
     </div> {# end row #}
+    <div class="row">
+      <div class="col-xs-9">
+        <p>
+          Page: {{ page }}
+        </p>
+        <nav>
+          <ul class="pager">
+            {% if (page - 1) == 0 %}
+              <li class="previous disabled">
+                <a href="">
+                  <span aria-hidden="true">
+                    &larr;
+                  </span>
+                  Newer
+                </a>
+              </li>
+            {% else %}
+              <li class="previous">
+                <a href="/index/{{ page - 1 }}">
+                  <span aria-hidden="true">
+                    &larr;
+                  </span>
+                  Newer
+                </a>
+              </li>
+            {% endif %}
+            {% if end %}
+              <li class="next disabled">
+                <a href="">
+                  Older
+                  <span aria-hidden="true">
+                    &rarr;
+                  </span>
+                </a>
+              </li>
+            {% else %}
+              <li class="next">
+                <a href="/index/{{ page + 1 }}">
+                  Older
+                  <span aria-hidden="true">
+                    &rarr;
+                  </span>
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    </div>
   </div> {# end container #}
   {% include 'footer.html' %}
 {% endblock %}

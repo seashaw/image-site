@@ -3,6 +3,10 @@ h3 p {
   text-align: right;
 }
 
+.pager .disabled {
+  outline: none;
+}
+
 /* Bootstrap Media queries. */
 
 /* xs */

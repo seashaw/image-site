@@ -41,7 +41,7 @@ app.config.update(dict(
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = "noreply@angryhos.com",
-    MAIL_PASSWORD = "angryhoszoho",
+    MAIL_PASSWORD = os.environ.get("ANGRY_HOS_EMAIL_PASSWORD"),
 
     ADMIN_EMAIL = "administrator@angryhos.com",
 

@@ -9,7 +9,7 @@ Description:
 
 import os
 from werkzeug import secure_filename
-import hashlib
+import uuid
 from datetime import datetime
 import pytz
 from pytz import timezone
@@ -34,13 +34,11 @@ from flask.ext.admin import expose, BaseView, AdminIndexView
 Helper functions.
 """
 
-def idHash(id):
+def nonceHash():
     """
-    Creates hash from user id.
+    Returns random UUID object.
     """
-    # Using very simple hashing method.
-    # Should I switch to something more robust?
-    return hashlib.sha1(str(id).encode()).hexdigest()
+    return uuid.uuid3(uuid.NAMESPACE_X500, user_name)
 
 def allowedFile(file_name):
     """
@@ -68,6 +66,7 @@ def index(page):
     """
     # This is just bad design overall.
     posts_per_page = 10
+    # Can I write a query that returns only the posts I want?
     results = db.session.query(Post, User).join(User).order_by(
             Post.id.desc()).limit(page * posts_per_page).all()
     posts = []
@@ -105,8 +104,7 @@ def register():
             db.session.add(user)
             db.session.commit()
             # URL for user confirmation.
-            confirm_url = url_for("confirmUser", user_email=user.email,
-                    id_hash=idHash(user.id),
+            confirm_url = url_for("confirmUser", uuid.uuid4().hex,
                     _external=True)
             # Create and send confirmation email.
             subject = "Please confirm your account."

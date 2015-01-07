@@ -37,11 +37,12 @@ class User(db.Model, UserMixin):
     first_name = db.Column(db.String(80))
     last_name = db.Column(db.String(80))
     user_name = db.Column(db.String(80), unique=True, index=True)
-    confirmed_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    confirmed_at = db.Column(db.DateTime(), nullable=True)
 
     roles = db.relationship('Role', secondary=user_roles,
             backref=db.backref('users', lazy='dynamic'))
     posts = db.relationship('Post', backref='users', order_by="Post.id")
+    nonce = db.relationship('Nonce', uselist=False, backref="users")
 
     def __init__(self, email='', password='', active=False, first_name='',
             last_name='', user_name='', roles=[], posts=[]):
@@ -112,3 +113,20 @@ class Picture(db.Model):
 
     def __repr__(self):
         return '<id: {} filename: {}>'.format(self.id, self.filename)
+
+class Nonce(db.Model):
+    """
+    Cryptographic nonces with time expiration, used for registration
+    and confirmation.
+    """
+    __tablename__ = 'nonces'
+    id = db.Column(db.Integer, primary_key=True)
+    nonce = db.Column(db.String(), unique=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    issued_at = db.Column(db.DateTime()) # All datetime entries should be UTC.
+    
+    def __init__(self, nonce_id='', user_id=0, issued_at='', nonce=''):
+        self.nonce_id = nonce_id
+        self.user_id = user_id
+        self.issued_at = issued_at
+        self.nonce = nonce

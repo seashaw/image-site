@@ -27,30 +27,30 @@ Classes to define database table schema.
 
 class User(db.Model, UserMixin):
     """
-    Defines schema for user datatable.
+    User information.
     """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(255), unique=True, index=True)
     password = db.Column(db.String(255))
-    active = db.Column(db.Boolean, default=False)
-    first_name = db.Column(db.String(80))
-    last_name = db.Column(db.String(80))
+    active = db.Column(db.Boolean, default=True)
     user_name = db.Column(db.String(80), unique=True, index=True)
-    confirmed_at = db.Column(db.DateTime(), nullable=True)
+    confirmed_at = db.Column(db.DateTime(timezone=True), nullable=True)
+    confirm_nonce = db.Column(db.String(), unique=True, nullable=True)
+    confirm_nonce_issued_at = db.Column(db.DateTime(timezone=True),
+            nullable=True)
+    reset_nonce = db.Column(db.String(), unique=True, nullable=True)
+    reset_nonce_issued_at = db.Column(db.DateTime(timezone=True),
+            nullable=True)
 
     roles = db.relationship('Role', secondary=user_roles,
             backref=db.backref('users', lazy='dynamic'))
     posts = db.relationship('Post', backref='users', order_by="Post.id")
-    nonce = db.relationship('Nonce', uselist=False, backref="users")
 
-    def __init__(self, email='', password='', active=False, first_name='',
-            last_name='', user_name='', roles=[], posts=[]):
+    def __init__(self, email='', password='', active=True, user_name='',
+            roles=[], posts=[]):
         self.email = email
         self.password = password
-        self.active = active
-        self.first_name = first_name
-        self.last_name = last_name
         self.user_name = user_name
 
     def __repr__(self):
@@ -58,7 +58,7 @@ class User(db.Model, UserMixin):
 
 class Role(db.Model):
     """
-    Table to define User roles.
+    User roles.
     """
     __tablename__ = 'roles'
     id = db.Column(db.Integer, primary_key=True)
@@ -81,7 +81,7 @@ class Post(db.Model):
     title = db.Column(db.String(80), unique=True)
     subtitle = db.Column(db.String(80))
     body = db.Column(db.Text)
-    posted_at = db.Column(db.DateTime()) # All datetime entries should be UTC.
+    posted_at = db.Column(db.DateTime(timezone=True))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     pictures = db.relationship('Picture', backref='posts')
@@ -113,20 +113,3 @@ class Picture(db.Model):
 
     def __repr__(self):
         return '<id: {} filename: {}>'.format(self.id, self.filename)
-
-class Nonce(db.Model):
-    """
-    Cryptographic nonces with time expiration, used for registration
-    and confirmation.
-    """
-    __tablename__ = 'nonces'
-    id = db.Column(db.Integer, primary_key=True)
-    nonce = db.Column(db.String(), unique=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    issued_at = db.Column(db.DateTime()) # All datetime entries should be UTC.
-    
-    def __init__(self, nonce_id='', user_id=0, issued_at='', nonce=''):
-        self.nonce_id = nonce_id
-        self.user_id = user_id
-        self.issued_at = issued_at
-        self.nonce = nonce

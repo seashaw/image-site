@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
 {% block body %}
-    <h2 id="heading">Posts:</h2>
-    <ul>
-        {% for post in posts %}
-            <li> 
-                <a href="{{ url_for('editPost', post_id=post.id) }}">
-                    {{ post.title }}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
-    {% include 'footer.html' %}
+  <h2 id="heading">Posts:</h2>
+  <ul>
+    {% for post in posts %}
+      <li> 
+        <a href="{{ url_for('editPost', post_id=post.id) }}">
+          {{ post.title }}
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+  {% include 'footer.html' %}
 {% endblock %}

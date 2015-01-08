@@ -24,6 +24,12 @@ from flask.ext.admin.contrib.fileadmin import FileAdmin
 # Initialize the application.
 app = Flask(__name__)
 
+def getPassword():
+    file = open("pw")
+    email_password = file.read().strip()
+    file.close()
+    return email_password
+
 # Load configuration.
 app.config.update(dict(
     # SQLAlchemy database connection address.
@@ -41,7 +47,7 @@ app.config.update(dict(
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = "noreply@angryhos.com",
-    MAIL_PASSWORD = os.environ.get("ANGRY_HOS_EMAIL_PASSWORD"),
+    MAIL_PASSWORD = getPassword(),
 
     ADMIN_EMAIL = "administrator@angryhos.com",
 

@@ -24,9 +24,15 @@ from flask.ext.admin.contrib.fileadmin import FileAdmin
 # Initialize the application.
 app = Flask(__name__)
 
-def getPassword():
-    file = open("pw")
+def getPassword(pw_file):
+    """
+    Function to get email password from local file.
+    """
+    # Open file for reading.
+    file = open(pw_file, mode='r')
+    # Read one line and strip newline character.
     email_password = file.read().strip()
+    # Close the file and return password.
     file.close()
     return email_password
 
@@ -47,7 +53,7 @@ app.config.update(dict(
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
     MAIL_USERNAME = "noreply@angryhos.com",
-    MAIL_PASSWORD = getPassword(),
+    MAIL_PASSWORD = getPassword("pw"),
 
     ADMIN_EMAIL = "administrator@angryhos.com",
 

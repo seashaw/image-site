@@ -8,12 +8,13 @@ Description:
 """
 
 import os
-from werkzeug import secure_filename
 import uuid
+import math
 from datetime import datetime
 import pytz
 from pytz import timezone, utc
 from PIL import Image
+from werkzeug import secure_filename
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session)
@@ -55,28 +56,20 @@ def index(page):
     """
     Application index, contains list of recent posts.
     """
-    # This is just bad design overall.
-    posts_per_page = 10
-    # Can I write a query that returns only the posts I want?
-    results = db.session.query(Post, User).join(User).order_by(
-            Post.id.desc()).limit(page * posts_per_page).all()
-    posts = []
-    if results:
+    # Number of posts per page.
+    ppp = 2
+    # Get posts for page.
+    posts = db.session.query(Post, User).join(User).order_by(
+            Post.id.desc()).offset((page-1) * ppp).limit(ppp).all()
+    count = Post.query.count() # Is this the best way to get count?
+    pages = math.ceil(count / ppp)
+    # Check if end was reached.
+    if len(posts) < ppp or page == pages:
         end = True
     else:
         end = False
-    if page - 1 == 0:
-        i = 0
-    else:
-        i = (page - 1) * posts_per_page
-    while i < (page * posts_per_page):
-        if len(results) == i:
-            end = True
-            break
-        else:
-            posts.append(results[i])
-            i += 1
-    return render_template("index.html", posts=posts, page=page, end=end)
+    return render_template("index.html", posts=posts, page=page, pages=pages,
+            end=end)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():

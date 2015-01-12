@@ -61,6 +61,7 @@ def index(page):
     # Get posts for page.
     posts = db.session.query(Post, User).join(User).order_by(
             Post.id.desc()).offset((page-1) * ppp).limit(ppp).all()
+    # Get total number of posts and divide into number of pages.
     count = Post.query.count() # Is this the best way to get count?
     pages = math.ceil(count / ppp)
     # Check if end was reached.
@@ -348,8 +349,10 @@ def editPost(post_id):
     """
     permission = EditBlogPostPermission(post_id)
     if permission.can():
-        form = EditPostForm()
         post = Post.query.get(post_id)
+        form = EditPostForm()
+        for pic in post.pictures:
+            form.pictures.append_entry()
         if form.title.data is None:
             form.title.data = post.title
             form.subtitle.data = post.subtitle

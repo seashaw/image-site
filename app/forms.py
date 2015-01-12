@@ -7,7 +7,7 @@ Description:
 from . model import User
 from flask.ext.wtf import Form
 from wtforms import (TextField, SubmitField, PasswordField, TextAreaField,
-        FieldList, FileField)
+        FieldList, FileField, BooleanField, FormField)
 from wtforms.validators import (InputRequired, Length, EqualTo, ValidationError,
         DataRequired, Email)
 
@@ -45,8 +45,9 @@ class LoginForm(Form):
     """
     User authentication.
     """
-    email = TextField("Email", validators=[InputRequired()])
-    password = PasswordField("password")
+    email = TextField("Email", validators=[InputRequired(),
+            Email(message="Invalid email address format.")])
+    password = PasswordField("Confirm Password", validators=[InputRequired()])
     submit = SubmitField("Login")
 
 class RegisterForm(Form):
@@ -98,8 +99,17 @@ class CreatePostForm(Form):
     body = TextAreaField('Body', validators=[InputRequired()])
     submit = SubmitField("Post")
 
+class EditImageDataForm(Form):
+    """
+    For manipulate picture and picture data.
+    """
+    title = TextField('Title')
+    delete = BooleanField()
+
 class EditPostForm(CreatePostForm):
     """
     Post editing and updating.
     """
+    pictures = FieldList(FormField(EditImageDataForm))
     submit = SubmitField("Update")
+

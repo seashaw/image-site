@@ -353,6 +353,8 @@ def editPost(post_id):
         form = EditPostForm()
         for pic in post.pictures:
             form.pictures.append_entry()
+        for fp, pp in zip(form.pictures, post.pictures):
+            fp.title.data = pp.title
         if form.title.data is None:
             form.title.data = post.title
             form.subtitle.data = post.subtitle

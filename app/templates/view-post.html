@@ -16,7 +16,7 @@
       </h3>
     </div> {# end row #}
     <div class="row">
-      {% if post.Post.pictures %}
+      {% if post.Post.gallery %}
         {# Gallery widget. #}
         <div id="blueimp-gallery"
             class="blueimp-gallery blueimp-gallery-controls">
@@ -30,14 +30,14 @@
         </div>
         {# Gallery picture thumbnails and links. #}
         <div id="links" class="links">
-          {% for pic in post.Post.pictures %}
+          {% for pic in post.Post.gallery %}
             <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
               <a href="../static/uploads/{{ '{}/{}/{}'.format(
                   post.Post.user_id, post.Post.id, pic.filename) }}"
-                  title="test" class="thumbnail">
+                  title="{{ pic.title }}" class="thumbnail">
                 <img src="../static/uploads/{{ '{}/{}/thumbnails/{}'.format(
                     post.Post.user_id, post.Post.id, pic.filename) }}"
-                    alt="{{ pic.filename }}"
+                    alt="{{ pic.title }}"
                     class="img-responsive img-rounded">
               </a>
             </div>

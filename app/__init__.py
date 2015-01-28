@@ -10,6 +10,7 @@ Description:
 import os
 from collections import namedtuple
 from functools import partial
+from datetime import datetime
 
 from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
@@ -23,6 +24,8 @@ from flask.ext.admin.contrib.fileadmin import FileAdmin
 
 # Initialize the application.
 app = Flask(__name__)
+# Add now to jinja globals for dynamic year footer.
+app.jinja_env.globals.update(now=datetime.now())
 
 def getPassword(pw_file):
     """
@@ -56,6 +59,9 @@ app.config.update(dict(
     MAIL_PASSWORD = getPassword("pw"),
 
     ADMIN_EMAIL = "administrator@angryhos.com",
+
+    # Set of allowed file extensions.
+    EXTENSIONS = set(["png", "jpg", "jpeg", "gif"]),
 
     # Upload settings.
     UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads',
@@ -126,8 +132,8 @@ def onIdentityLoaded(sender, identity):
 
     # Update identity with list of posts that user authored.
     # Refers to relationship 'posts' from User model.
-    if hasattr(current_user, 'posts'):
-        for post in current_user.posts:
+    if hasattr(current_user, 'postings'):
+        for post in current_user.postings:
             identity.provides.add(EditBlogPostNeed(str(post.id)))
 
 # Controller import.

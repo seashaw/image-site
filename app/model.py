@@ -45,7 +45,7 @@ class User(db.Model, UserMixin):
 
     roles = db.relationship('Role', secondary=user_roles,
             backref=db.backref('users', lazy='dynamic'))
-    posts = db.relationship('Post', backref='users', order_by="Post.id")
+    postings = db.relationship('Post', backref='users', order_by="Post.id")
 
     def __init__(self, email='', password='', active=True, user_name='',
             roles=[], posts=[]):
@@ -78,13 +78,16 @@ class Post(db.Model):
     """
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(80), unique=True)
-    subtitle = db.Column(db.String(80))
-    body = db.Column(db.Text)
+    title = db.Column(db.String(80))
+    subtitle = db.Column(db.String(80), nullable=True)
+    body = db.Column(db.Text, nullable=True)
     posted_at = db.Column(db.DateTime(timezone=True))
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
-    pictures = db.relationship('Picture', backref='posts')
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    cover_id = db.Column(db.Integer, db.ForeignKey('pictures.id',
+            use_alter=True, name='fk_post_cover_id'))
+
+    cover = db.relationship('Picture', foreign_keys=cover_id, post_update=True)
 
     def __init__(self, title='', subtitle='', body='', posted_at='',
             user_id=0):
@@ -105,11 +108,17 @@ class Picture(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(80))
     title = db.Column(db.String(80))
+
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
+
+    post = db.relationship('Post', foreign_keys=post_id, backref='gallery')
     
-    def __init__(self, filename='', title=filename):
+    def __init__(self, filename='', title=''):
         self.filename = filename
-        self.title = title
+        if len(title) == 0:
+            self.title = filename 
+        else:
+            self.title = title
 
     def __repr__(self):
         return '<id: {} filename: {}>'.format(self.id, self.filename)

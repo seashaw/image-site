@@ -25,12 +25,12 @@
                 </p>
               </h3>
             </div> {# end caption #}
-            {% if post.Post.pictures %}
+            {% if post.Post.gallery %}
               <a href="{{ url_for('viewPost',
                   post_id=post.Post.id) }}">
                 <img src="{{ '/static/uploads/{}/{}/{}'.format(
                     post.Post.user_id, post.Post.id,
-                    post.Post.pictures[0].filename) }}"
+                    post.Post.cover.filename) }}"
                     class="img-responsive img-rounded"
                     alt="Post cover.">
               </a>

@@ -1,0 +1,23 @@
+﻿{# Form error notification. #}
+{% if form.errors %}
+  <div class="container">
+    {% for field_name, field_errors in form.errors|dictsort
+        if field_errors %}
+      {% for error in field_errors %}
+        <div class="alert alert-warning alert-dismissable"
+          role="alert">
+          <button type="button" class="close"
+              data-dismiss="alert">
+            <span class="glyphicon glyphicon-remove"
+                aria-hidden="true">
+            </span>
+            <span class="sr-only">
+              Dismiss
+            </span>
+          </button>
+          {{ form[field_name].label }}: {{ error }}
+        </div> {# end alert #}
+      {% endfor %}
+    {% endfor %}
+  </div> {# end container #}
+{% endif %}

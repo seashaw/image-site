@@ -4,7 +4,7 @@ Authors:
     2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description:
     Routing for web application, generates views using templates,
-    and handles logic for user interaction.
+    and handles logic for user input.
 """
 
 import os
@@ -17,7 +17,7 @@ from PIL import Image
 from werkzeug import secure_filename
 
 from flask import (Flask, render_template, jsonify, request, redirect,
-        url_for, flash, current_app, session)
+        url_for, flash, current_app, session, abort)
 from flask.ext.login import (login_required, login_user, logout_user,
         current_user)
 from flask.ext.mail import Message
@@ -26,7 +26,7 @@ from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 from . import app, bc, mail, db, EditBlogPostPermission
 from .model import User, Post, Picture
 from .forms import (LoginForm, RegisterForm, CreatePostForm,  EditPostForm,
-        ConfirmationRequestForm, PasswordResetForm, RequestPasswordResetForm)
+        ServiceRequestForm, PasswordResetForm, EditImageDataForm, RadioField)
 
 """
 Helper functions.
@@ -36,13 +36,10 @@ def allowedFile(file_name):
     """
     Checks file name for allowed extension.
     """
-
-    # Set of allowed file extensions.
-    extensions = set(["png", "jpg", "jpeg", "gif"])
-
     # Split file_name from the right at period, check if in extensions set, 
     # and return.
-    return "." in file_name and file_name.rsplit(".", 1)[1] in extensions
+    return "." in file_name and file_name.rsplit(".", 1)[1] in \
+            app.config["EXTENSIONS"]
 
 
 """
@@ -80,9 +77,9 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         # Feed form data into User object creation.
-        user = User(form.email.data,
-                bc.generate_password_hash(form.password.data, rounds=12),
-                form.user_name.data)
+        user = User(email=form.email.data,
+                password=bc.generate_password_hash(form.password.data,
+                rounds=12), user_name=form.user_name.data)
         # Generate cryptographic nonce with datetime.
         user.confirm_nonce = uuid.uuid4().hex
         user.confirm_nonce_issued_at = datetime.now(tz=utc)
@@ -138,7 +135,7 @@ def reconfirm():
     """
     Allows registered users to request a new confirmation link.
     """
-    form = ConfirmationRequestForm()
+    form = ServiceRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if not user.confirmed_at:
@@ -191,7 +188,7 @@ def login():
                 flash("Login successful.", "success")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
-                flash("Wrong password.", "warning")
+                flash("Incorrect email / password.", "warning")
                 return redirect(url_for("login"))
     return render_template("login.html", form=form)
 
@@ -217,7 +214,7 @@ def requestReset():
     """
     Endpoint to allow users to request a password reset.
     """
-    form = RequestPasswordResetForm()
+    form = ServiceRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         # Generate cryptographic nonce with datetime.
@@ -230,7 +227,7 @@ def requestReset():
                     _external=True)
             # Create and send confirmation email.
             subject = "Password reset request."
-            html = "Click <a href='{}'>here</a> to confirm.".format(
+            html = "Click <a href='{}'>here</a> to reset password.".format(
                     confirm_url)
             msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
                     recipients=[user.email], html=html)
@@ -267,7 +264,7 @@ def passwordReset(nonce):
                 user.reset_nonce = None
                 user.reset_nonce_issued_at = None
                 db.session.commit()
-                flash("Password reset successful.", "success")
+                flash("Password reset successful.  You can now login.", "success")
                 return redirect(url_for("login"))
     return render_template("password-reset.html", form=form, nonce=nonce)
 
@@ -321,7 +318,9 @@ def createPost():
                             thumb.format)
                     # Create Picture model object and add to list in post.
                     picture = Picture(file_name)
-                    post.pictures.append(picture)
+                    post.gallery.append(picture)
+                    if pic.filename == request.form['choice']:
+                        post.cover = picture
         # Commit changes to database.
         try:
             db.session.commit()
@@ -346,39 +345,88 @@ def userPosts():
 def editPost(post_id):
     """
     Editing existing posts.
+    This whole thing is a horrible, horrible mess... Jesus, Lord have mercy!
     """
     permission = EditBlogPostPermission(post_id)
     if permission.can():
+        # Get post object from database.
         post = Post.query.get(post_id)
+        # Create new form instance.
         form = EditPostForm()
-        for pic in post.pictures:
-            form.pictures.append_entry()
-        for fp, pp in zip(form.pictures, post.pictures):
-            fp.title.data = pp.title
-        if form.title.data is None:
+        if request.method == "GET":
+            for pic in post.gallery:
+                form.pic_forms.append_entry()
+            for p, f in zip(post.gallery, form.pic_forms):
+                f.title.data = p.title
             form.title.data = post.title
             form.subtitle.data = post.subtitle
             form.body.data = post.body
-        if form.validate_on_submit():
-            if form.pics.data:
-                pic_dest = os.path.join("{}/{}/{}".format(
-                        app.config["UPLOAD_FOLDER"], current_user.id, post.id))
-                pics = request.files.getlist('pics')
+        elif request.method == "POST" and form.validate_on_submit():
+            # Paths for pictures and thumbnails.
+            pic_dest = os.path.join("{}/{}/{}".format(
+                    app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+            thumb_dest = os.path.join("{}/{}".format(pic_dest,
+                    "thumbnails"))
+            # Delete and rename posts as necessary.
+            choice = request.form['choice']
+            for fp, pp in zip(form.pic_forms, list(post.gallery)):
+                if fp.delete.data:
+                    os.remove("{}/{}".format(pic_dest, pp.filename))
+                    os.remove("{}/{}".format(thumb_dest, pp.filename))
+                    post.gallery.remove(pp)
+                    if pp == post.cover:
+                        post.cover = post.gallery[0]
+                    db.session.delete(pp)
+                    fp.delete.data = False
+                elif fp.title.data != pp.title:
+                    pp.title= fp.title.data
+            # Check form for changes and save.
+            if post.title != form.title.data:
+                post.title = form.title.data
+            if post.subtitle != form.subtitle.data:
+                post.subtitle = form.subtitle.data
+            if post.body != form.body.data:
+                post.body = form.body.data
+            # Check if pics have been selected for upload, add to database
+            # and save as necessary.
+            thumb_size = (256, 256)
+            pics = request.files.getlist('pics')
+            if pics[0].filename:
                 for pic in pics:
                     if allowedFile(pic.filename):
-                        # Secure file name, save file to system and append
-                        # file to post object pictures list.
+                        # Secure filename and save picture.
                         file_name = secure_filename(pic.filename)
                         pic.save("{}/{}".format(pic_dest, file_name))
+                        # Create and save thumbnail.
+                        thumb = Image.open("{}/{}".format(pic_dest, file_name))
+                        thumb.thumbnail(thumb_size)
+                        thumb.save("{}/{}".format(thumb_dest, file_name),
+                                thumb.format)
+                        # Add Picture object to post list.
                         picture = Picture(file_name)
-                        post.pictures.append(picture)
-            form.populate_obj(post)
-            db.session.commit()
-            flash("Post changes have been saved.", "sucess")
-            return redirect(url_for('editPost', post_id=post.id))
-        return render_template('edit-post.html', form=form, post=post)
+                        post.gallery.append(picture)
+                        # Really hacky way of adding form entry... 
+                        form.pic_forms.append_entry()
+                        last_index = len(form.pic_forms) - 1
+                        form.pic_forms[last_index].title.data = \
+                                picture.filename
+                    else:
+                        flash("Invalid file extension: {}".format(
+                                pic.filename), "warning")
+            # Set selected pic as post cover.
+            for pic in post.gallery:
+                if pic.filename == request.form['choice']:
+                    post.cover = pic
+            try:
+                db.session.commit()
+                flash("Post has been updated.", "success")
+            except Exception as e:
+                flash("Error saving post data.", "danger")
+        # Zip pics and forms for easy iterating in template.
+        return render_template('edit-post.html', form=form, post=post,
+                zipped=zip(form.pic_forms, post.gallery))
     else:
-        flash("You lack editing rights for this post.", "danger")
+        flash("You lack editing rights for this post.", "warning")
         return redirect(url_for('userPosts'))
 
 @app.route('/view/<post_id>', methods=["GET", "POST"])
@@ -389,3 +437,15 @@ def viewPost(post_id):
     post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
             User).first()
     return render_template('view-post.html', post=post)
+
+@app.route("/test", methods=["GET", "POST"])
+def test():
+    """
+    Testbed for experimentation.
+    """
+    if request.method == 'POST':
+        files = request.files.getlist('file')
+        for file in files:
+            print(file.filename)
+        print(request.form['choice'])
+    return render_template('test.html')

@@ -1,37 +1,44 @@
 {% extends "base.html" %}
 {% block body %}
+{# Form error notifications. #}
+{% include 'form-errors.html' %}
 <div class="container">
-      {# Form error notifications. #}
-        {% if form.errors %}
-t            {% for field_name, field_errors in form.errors|dictsort if field_errors %}
-                {% for error in field_errors %}
-                    <div class="alert alert-danger" role="alert">
-                        {{ form[field_name].label }}: {{ error }}
-                    </div>
-                {% endfor %}
-            {% endfor %}
-        {% endif %}
-
-        <form role="form" action="/create" method=post accept-charset="utf-8" enctype="multipart/form-data">
-            {{ form.hidden_tag() }}
-            <div class="form-group">
-                {{ form.pics.label }}
-                {{ form.pics(multiple="") }}
-            </div>
-            <div class="form-group">
-                {{ form.title.label }}
-                {{ form.title(size=80, class_="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.subtitle.label }}
-                {{ form.subtitle(size=80, class_="form-control") }}
-            </div>
-            <div class="form-group">
-                {{ form.body.label }}
-                {{ form.body(class_="form-control") }}
-            </div>
-            {{ form.submit(class_="btn btn-default") }}
-        </form>
-        {% include 'footer.html' %}
-    </div>
+  <div class="row">
+    <form role="form" action="/create" method=post accept-charset="utf-8"
+        enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+      <div>
+        <p>
+          Selected Pics:
+        </p>
+        <ul id="selection">
+        </ul>
+      </div>
+      <div class="form-group">
+        {{ form.pics.label }}
+        {{ form.pics(multiple="") }}
+      </div>
+      <div class="form-group">
+        {{ form.title.label }}
+        {{ form.title(size=80, class_="form-control") }}
+      </div>
+      <div class="form-group">
+        {{ form.subtitle.label }}
+        {{ form.subtitle(size=80, class_="form-control") }}
+      </div>
+      <div class="form-group">
+        {{ form.body.label }}
+        {{ form.body(class_="form-control") }}
+      </div>
+      {{ form.submit(class_="btn btn-default") }}
+    </form>
+  </div> {# end row #}
+  {% include 'footer.html' %}
+</div> {# end container #}
+{# Plupload JavaScript import. #}
+<script type="text/javascript" charset="utf-8"
+    src="../static/js/plupload.full.min.js"></script>
+{# Custom JavaScript import. #}
+<script type="text/javascript" charset="utf-8"
+    src="../static/js/pic-select.js"></script>
 {% endblock %}

@@ -4,10 +4,12 @@ Created: 2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description: 
     Forms and custom validators for form fields.
 """
-from . model import User
+from .model import User
 from flask.ext.wtf import Form
+import wtforms
+from flask.ext.login import current_user
 from wtforms import (TextField, SubmitField, PasswordField, TextAreaField,
-        FieldList, FileField, BooleanField, FormField)
+        FieldList, FileField, BooleanField, FormField, RadioField)
 from wtforms.validators import (InputRequired, Length, EqualTo, ValidationError,
         DataRequired, Email)
 
@@ -29,13 +31,12 @@ def emailExistsCheck(form, field):
     if not User.query.filter_by(email=field.data).first():
         raise ValidationError('"{}" is not registered'.format(field.data))
 
-def userNameCheck(form, field):
+def uniqueUserNameCheck(form, field):
     """
     Unique user name validation.
     """
     if User.query.filter_by(user_name=field.data).first():
         raise ValidationError('"{}" is already taken'.format(field.data))
-
 
 """
 Forms for user input.
@@ -47,7 +48,7 @@ class LoginForm(Form):
     """
     email = TextField("Email", validators=[InputRequired(),
             Email(message="Invalid email address format.")])
-    password = PasswordField("Confirm Password", validators=[InputRequired()])
+    password = PasswordField("Password", validators=[InputRequired()])
     submit = SubmitField("Login")
 
 class RegisterForm(Form):
@@ -56,7 +57,8 @@ class RegisterForm(Form):
     """
     email = TextField("Email", validators=[InputRequired(),
             Email(message="Invalid email address format."), uniqueEmailCheck])
-    user_name = TextField("User Name", validators=[DataRequired(), userNameCheck])
+    user_name = TextField("User Name", validators=[DataRequired(),
+            uniqueUserNameCheck])
     password = PasswordField("New Password", validators=[InputRequired(),
             EqualTo("confirm", message="Passwords must match."),
             Length(min=8, max=64, message="Password must be between 8 and 64 "
@@ -64,19 +66,12 @@ class RegisterForm(Form):
     confirm = PasswordField("Confirm Password", validators=[InputRequired()])
     submit = SubmitField("Register")
 
-class ConfirmationRequestForm(Form):
+class ServiceRequestForm(Form):
     """
-    Allows users to input their email to receive a confirmation link.
-    """
-    email = TextField("Email", validators=[InputRequired(), emailExistsCheck] )
-    submit = SubmitField("Request Link")
-        
-class RequestPasswordResetForm(Form):
-    """
-    User request password reset form.
+    Allows users to input their email to process service requests.
     """
     email = TextField("Email", validators=[InputRequired(), emailExistsCheck] )
-    submit = SubmitField("Request Reset")
+    submit = SubmitField("Send Request")
 
 class PasswordResetForm(Form):
     """
@@ -95,21 +90,20 @@ class CreatePostForm(Form):
     """
     pics = FileField('Add Pictures')
     title = TextField('Title', validators=[InputRequired()])
-    subtitle = TextField('Subtitle', validators=[InputRequired()])
-    body = TextAreaField('Body', validators=[InputRequired()])
+    subtitle = TextField('Subtitle')
+    body = TextAreaField('Body')
     submit = SubmitField("Post")
 
-class EditImageDataForm(Form):
+class EditImageDataForm(wtforms.Form):
     """
-    For manipulate picture and picture data.
+    For editing picture data.
     """
     title = TextField('Title')
-    delete = BooleanField()
+    delete = BooleanField('Delete', default=False)
 
 class EditPostForm(CreatePostForm):
     """
-    Post editing and updating.
+    Post editing and updating posts.
     """
-    pictures = FieldList(FormField(EditImageDataForm))
+    pic_forms = FieldList(FormField(EditImageDataForm))
     submit = SubmitField("Update")
-

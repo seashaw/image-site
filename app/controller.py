@@ -306,7 +306,9 @@ def createPost():
             os.chmod(thumb_dest, mode=0o777)
             # Get list of upload files.
             pics = request.files.getlist('pics')
-            for pic in pics:
+            if len(pics) > 8:
+                flash("Posts cannot have more than 8 pictures.", "warning")
+            for pic, count in zip(pics, list(range(8))):
                 if allowedFile(pic.filename):
                     # Secure filename and save picture.
                     file_name = secure_filename(pic.filename)
@@ -367,17 +369,23 @@ def editPost(post_id):
                     app.config["UPLOAD_FOLDER"], current_user.id, post.id))
             thumb_dest = os.path.join("{}/{}".format(pic_dest,
                     "thumbnails"))
-            # Delete and rename posts as necessary.
+            # Get radio choice value from submitted form.
             choice = request.form['choice']
+            # Loop through form fields and gallery pics.
             for fp, pp in zip(form.pic_forms, list(post.gallery)):
+                # If pic selected for deletion.
                 if fp.delete.data:
                     os.remove("{}/{}".format(pic_dest, pp.filename))
                     os.remove("{}/{}".format(thumb_dest, pp.filename))
                     post.gallery.remove(pp)
+                    # If deleted pic was post cover, reassign to
+                    # first pic in gallery.
                     if pp == post.cover:
                         post.cover = post.gallery[0]
+                    # Remove from database and reset form field.
                     db.session.delete(pp)
                     fp.delete.data = False
+                # Or assign new title if post renamed.
                 elif fp.title.data != pp.title:
                     pp.title= fp.title.data
             # Check form for changes and save.

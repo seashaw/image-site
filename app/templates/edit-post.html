@@ -9,9 +9,9 @@
         enctype="multipart/form-data" accept-charset="utf-8">
       {{ form.hidden_tag() }}
       {% if post.gallery %}
-      <div class="row">
+      <div id='picfield' class="row">
         {% for pic_form, gallery_pic in zipped %}
-        <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
+        <div class="pic col-xs-6 col-sm-6 col-md-6 col-lg-6">
           <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             <a href="../static/uploads/{{ '{}/{}/{}'.format(
                 post.user_id, post.id, gallery_pic.filename) }}"
@@ -22,14 +22,14 @@
                   alt="{{ gallery_pic.filename }}"
                   class="img-responsive img-rounded">
             </a>
-          </div>
+          </div> {# end col #}
           <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
             {{ pic_form.title.label }}
             {{ pic_form.title }}
             {{ pic_form.delete.label }}
             {{ pic_form.delete }}
             <p>
-              Select as cover:
+              <label>Select as cover:</label>
               {% if post.cover.filename == gallery_pic.filename: %}
                 <input type='radio' value='{{ gallery_pic.filename }}'
                     name='choice' checked>
@@ -40,8 +40,8 @@
                 </input>
               {% endif %}
             </p>
-          </div>
-        </div>
+          </div> {# end col #}
+        </div> {# end col #}
         {% endfor %}
         <ul id='selection'>
         </ul>

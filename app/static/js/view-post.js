@@ -9,4 +9,3 @@ document.getElementById('links').onclick = function(event) {
             links = this.getElementsByTagName('a');
     blueimp.Gallery(links, options);
 };
-console.log("Fuck you.");

@@ -264,7 +264,8 @@ def passwordReset(nonce):
                 user.reset_nonce = None
                 user.reset_nonce_issued_at = None
                 db.session.commit()
-                flash("Password reset successful.  You can now login.", "success")
+                flash("Password reset successful.  You can now login.",
+                        "success")
                 return redirect(url_for("login"))
     return render_template("password-reset.html", form=form, nonce=nonce)
 
@@ -364,72 +365,86 @@ def editPost(post_id):
             form.subtitle.data = post.subtitle
             form.body.data = post.body
         elif request.method == "POST" and form.validate_on_submit():
-            # Paths for pictures and thumbnails.
-            pic_dest = os.path.join("{}/{}/{}".format(
-                    app.config["UPLOAD_FOLDER"], current_user.id, post.id))
-            thumb_dest = os.path.join("{}/{}".format(pic_dest,
-                    "thumbnails"))
-            # Get radio choice value from submitted form.
-            choice = request.form['choice']
-            # Loop through form fields and gallery pics.
-            for fp, pp in zip(form.pic_forms, list(post.gallery)):
-                # If pic selected for deletion.
+            # Check to make sure that post will have 8 or less pictures.
+            deletes = 0
+            for fp in form.pic_forms:
                 if fp.delete.data:
-                    os.remove("{}/{}".format(pic_dest, pp.filename))
-                    os.remove("{}/{}".format(thumb_dest, pp.filename))
-                    post.gallery.remove(pp)
-                    # If deleted pic was post cover, reassign to
-                    # first pic in gallery.
-                    if pp == post.cover:
-                        post.cover = post.gallery[0]
-                    # Remove from database and reset form field.
-                    db.session.delete(pp)
-                    fp.delete.data = False
-                # Or assign new title if post renamed.
-                elif fp.title.data != pp.title:
-                    pp.title= fp.title.data
-            # Check form for changes and save.
-            if post.title != form.title.data:
-                post.title = form.title.data
-            if post.subtitle != form.subtitle.data:
-                post.subtitle = form.subtitle.data
-            if post.body != form.body.data:
-                post.body = form.body.data
-            # Check if pics have been selected for upload, add to database
-            # and save as necessary.
-            thumb_size = (256, 256)
+                    deletes += 1
+            # Get list of uploaded pics, if any.
+            uploads = 0
             pics = request.files.getlist('pics')
-            if pics[0].filename:
-                for pic in pics:
-                    if allowedFile(pic.filename):
-                        # Secure filename and save picture.
-                        file_name = secure_filename(pic.filename)
-                        pic.save("{}/{}".format(pic_dest, file_name))
-                        # Create and save thumbnail.
-                        thumb = Image.open("{}/{}".format(pic_dest, file_name))
-                        thumb.thumbnail(thumb_size)
-                        thumb.save("{}/{}".format(thumb_dest, file_name),
-                                thumb.format)
-                        # Add Picture object to post list.
-                        picture = Picture(file_name)
-                        post.gallery.append(picture)
-                        # Really hacky way of adding form entry... 
-                        form.pic_forms.append_entry()
-                        last_index = len(form.pic_forms) - 1
-                        form.pic_forms[last_index].title.data = \
-                                picture.filename
-                    else:
-                        flash("Invalid file extension: {}".format(
-                                pic.filename), "warning")
-            # Set selected pic as post cover.
-            for pic in post.gallery:
-                if pic.filename == request.form['choice']:
-                    post.cover = pic
-            try:
-                db.session.commit()
-                flash("Post has been updated.", "success")
-            except Exception as e:
-                flash("Error saving post data.", "danger")
+            uploads = len(pics)
+            if uploads == 1:
+                if not pics[0].filename:
+                    uploads = 0
+            if len(post.gallery) + uploads - deletes <= 8:
+                # Paths for pictures and thumbnails.
+                pic_dest = os.path.join("{}/{}/{}".format(
+                        app.config["UPLOAD_FOLDER"], current_user.id, post.id))
+                thumb_dest = os.path.join("{}/{}".format(pic_dest,
+                        "thumbnails"))
+                # Get radio choice value from submitted form.
+                choice = request.form['choice']
+                # Loop through form fields and gallery pics.
+                for fp, pp in zip(form.pic_forms, list(post.gallery)):
+                    # If pic selected for deletion.
+                    if fp.delete.data:
+                        os.remove("{}/{}".format(pic_dest, pp.filename))
+                        os.remove("{}/{}".format(thumb_dest, pp.filename))
+                        post.gallery.remove(pp)
+                        # If deleted pic was post cover, reassign to
+                        # first pic in gallery.
+                        if pp == post.cover:
+                            post.cover = post.gallery[0]
+                        # Remove from database and reset form field.
+                        db.session.delete(pp)
+                        fp.delete.data = False
+                    # Or assign new title if post renamed.
+                    elif fp.title.data != pp.title:
+                        pp.title= fp.title.data
+                # Check form for changes and save.
+                if post.title != form.title.data:
+                    post.title = form.title.data
+                if post.subtitle != form.subtitle.data:
+                    post.subtitle = form.subtitle.data
+                if post.body != form.body.data:
+                    post.body = form.body.data
+                # Set thumbnail size.
+                thumb_size = (256, 256)
+                if pics[0].filename:
+                    for pic in pics:
+                        if allowedFile(pic.filename):
+                            # Secure filename and save picture.
+                            file_name = secure_filename(pic.filename)
+                            pic.save("{}/{}".format(pic_dest, file_name))
+                            # Create and save thumbnail.
+                            thumb = Image.open("{}/{}".format(pic_dest,
+                                    file_name))
+                            thumb.thumbnail(thumb_size)
+                            thumb.save("{}/{}".format(thumb_dest, file_name),
+                                    thumb.format)
+                            # Add Picture object to post list.
+                            picture = Picture(file_name)
+                            post.gallery.append(picture)
+                            # Really hacky way of adding form entry... 
+                            form.pic_forms.append_entry()
+                            last_index = len(form.pic_forms) - 1
+                            form.pic_forms[last_index].title.data = \
+                                    picture.filename
+                        else:
+                            flash("Invalid file extension: {}".format(
+                                    pic.filename), "warning")
+                # Set selected pic as post cover.
+                for pic in post.gallery:
+                    if pic.filename == request.form['choice']:
+                        post.cover = pic
+                try:
+                    db.session.commit()
+                    flash("Post has been updated.", "success")
+                except Exception as e:
+                    flash("Error saving post data.", "danger")
+            else:
+                flash("Posts cannot have more than 8 pictures.", "warning")
         # Zip pics and forms for easy iterating in template.
         return render_template('edit-post.html', form=form, post=post,
                 zipped=zip(form.pic_forms, post.gallery))
@@ -449,7 +464,7 @@ def viewPost(post_id):
 @app.route("/test", methods=["GET", "POST"])
 def test():
     """
-    Testbed for experimentation.
+    endpoint for testing
     """
     if request.method == 'POST':
         files = request.files.getlist('file')

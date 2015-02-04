@@ -1,13 +1,5 @@
 ﻿// When files are selected for upload, display selection with form fields.
 $('#pics').bind('change', function() {
-    /*
-    $('#selection').empty();
-    $.each(this.files, function(index, value) {
-        $('#selection').append("<li>" + value.name +
-                "Select as cover: <input type='radio' value='" + 
-                value.name + "' name='choice'></input></li>");
-    });
-    */
     $('.selected').remove();
     $.each(this.files, function(index, value) {
         $('#picfield').append(
@@ -35,8 +27,16 @@ $('form').submit(function(event) {
     if($('input:radio[name=choice]').is(':checked') === false) {
         $('input:radio:first').attr('checked', true);
     }
-    if($('.selected').length + $('.pic').length > 8) {
-        :wq
-
+    // Number of pics selected for upload.
+    var selected = $('.selected').length;
+    // Number of pics selected for deletion.
+    var deleted = $('input:checkbox:checked').length;
+    // Number of pics already in gallery post.
+    var gallery_pics = $('.pic').length;
+    if(gallery_pics + selected - deleted > 8) {
+        flash("Posts cannot have more than 8 pictures.", 'warning');
+        $('#pics').val('');
+        $('.selected').remove();
+        event.preventDefault();
     }
 });

@@ -101,7 +101,7 @@
 {# List flashed messages. #}
 {% with messages = get_flashed_messages(with_categories=true) %}
   <div class="container">
-    <div class="row">
+    <div id="flash-alerts" class="row">
       {% if messages %}
         {% for category, message in messages %}
           <div class="alert alert-{{ category }} alert-dismissable"
@@ -113,7 +113,9 @@
                 Close
               </span>
             </button>
-            {{ message }}
+            <p>
+              {{ message }}
+            </p>
           </div> {# end alert #}
         {% endfor %}
       {% endif %}

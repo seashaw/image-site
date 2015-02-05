@@ -401,7 +401,7 @@ def editPost(post_id):
                         fp.delete.data = False
                     # Or assign new title if post renamed.
                     elif fp.title.data != pp.title:
-                        pp.title= fp.title.data
+                        pp.title = fp.title.data
                 # Check form for changes and save.
                 if post.title != form.title.data:
                     post.title = form.title.data

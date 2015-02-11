@@ -109,7 +109,7 @@ def confirmUser(nonce):
     """
     Confirms user account.
     """
-    user = User.query.filter_by(confirm_nonce=nonce).first()
+    user = User.query.filter_by(confirm_nonce=nonce).one()
     if user is None:
         return abort(404)
     else:
@@ -137,7 +137,7 @@ def reconfirm():
     """
     form = ServiceRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).one()
         if not user.confirmed_at:
             # Generate cryptographic nonce with datetime.
             user.confirm_nonce = uuid.uuid4().hex
@@ -168,7 +168,7 @@ def reconfirm():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).one()
         if user is None:
             flash("No account for '{}'".format(form.email.data), "warning")
             return redirect(url_for("login"))
@@ -216,7 +216,7 @@ def requestReset():
     """
     form = ServiceRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).one()
         # Generate cryptographic nonce with datetime.
         user.reset_nonce = uuid.uuid4().hex
         user.reset_nonce_issued_at = datetime.now(tz=utc)
@@ -245,7 +245,7 @@ def passwordReset(nonce):
     """
     Reset password form.
     """
-    user = User.query.filter_by(reset_nonce=nonce).first()
+    user = User.query.filter_by(reset_nonce=nonce).one()
     if user is None:
         return abort(404)
     else:
@@ -274,7 +274,7 @@ def viewProfile(user_name):
     """
     Display user information and profile.
     """
-    user = User.query.filter_by(user_name=user_name).first()
+    user = User.query.filter_by(user_name=user_name).one()
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
@@ -286,8 +286,9 @@ def createPost():
     form = CreatePostForm()
     if form.validate_on_submit():
         # Feed form data into post object.
-        post = Post(form.title.data, form.subtitle.data, form.body.data,
-                datetime.now(tz=utc), current_user.id)
+        post = Post(title=form.title.data, subtitle=form.subtitle.data,
+                body=form.body.data, posted_at=datetime.now(tz=utc),
+                user_id=current_user.id)
         # Add post to session and flush to update post object.
         db.session.add(post)
         db.session.flush()
@@ -320,7 +321,7 @@ def createPost():
                     thumb.save("{}/{}".format(thumb_dest, file_name),
                             thumb.format)
                     # Create Picture model object and add to list in post.
-                    picture = Picture(file_name)
+                    picture = Picture(filename=file_name)
                     post.gallery.append(picture)
                     if pic.filename == request.form['choice']:
                         post.cover = picture
@@ -458,7 +459,7 @@ def viewPost(post_id):
     View an individual post.
     """
     post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
-            User).first()
+            User).one()
     return render_template('view-post.html', post=post)
 
 @app.route("/test", methods=["GET", "POST"])

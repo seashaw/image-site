@@ -7,13 +7,8 @@
     <form role="form" action="/create" method=post accept-charset="utf-8"
         enctype="multipart/form-data">
       {{ form.hidden_tag() }}
-      <div>
-        <p>
-          Selected Pics:
-        </p>
-        <ul id="selection">
-        </ul>
-      </div>
+      <div id='picfield' class="row">
+      </div> {# end row #}
       <div class="form-group">
         {{ form.pics.label }}
         {{ form.pics(multiple="") }}

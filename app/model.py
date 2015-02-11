@@ -9,6 +9,7 @@ Description:
 from . import app, db
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy.ext.orderinglist import ordering_list
 
 from flask.ext.login import UserMixin
 
@@ -48,7 +49,7 @@ class User(db.Model, UserMixin):
     postings = db.relationship('Post', backref='users', order_by="Post.id")
 
     def __init__(self, email='', password='', active=True, user_name='',
-            roles=[], posts=[]):
+            roles=[], postings=[]):
         self.email = email
         self.password = password
         self.user_name = user_name
@@ -86,8 +87,12 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     cover_id = db.Column(db.Integer, db.ForeignKey('pictures.id',
             use_alter=True, name='fk_post_cover_id'))
-
-    cover = db.relationship('Picture', foreign_keys=cover_id, post_update=True)
+    cover = db.relationship('Picture', uselist=False, foreign_keys=cover_id,
+            post_update=True)
+    gallery = db.relationship('Picture',
+            primaryjoin="Post.id==Picture.post_id",
+            order_by='Picture.position',
+            collection_class=ordering_list('position'))
 
     def __init__(self, title='', subtitle='', body='', posted_at='',
             user_id=0):
@@ -108,17 +113,16 @@ class Picture(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(80))
     title = db.Column(db.String(80))
-
+    position = db.Column(db.Integer)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
-    post = db.relationship('Post', foreign_keys=post_id, backref='gallery')
-    
     def __init__(self, filename='', title=''):
         self.filename = filename
-        if len(title) == 0:
+        if title == '':
             self.title = filename 
         else:
             self.title = title
 
     def __repr__(self):
-        return '<id: {} filename: {}>'.format(self.id, self.filename)
+        return '<id: {} filename: {} position: {}>'.format(
+                self.id, self.filename, self.position)

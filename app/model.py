@@ -83,16 +83,16 @@ class Post(db.Model):
     subtitle = db.Column(db.String(80), nullable=True)
     body = db.Column(db.Text, nullable=True)
     posted_at = db.Column(db.DateTime(timezone=True))
-
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     cover_id = db.Column(db.Integer, db.ForeignKey('pictures.id',
             use_alter=True, name='fk_post_cover_id'))
+
     cover = db.relationship('Picture', uselist=False, foreign_keys=cover_id,
             post_update=True)
     gallery = db.relationship('Picture',
             primaryjoin="Post.id==Picture.post_id",
             order_by='Picture.position',
-            collection_class=ordering_list('position'))
+            collection_class=ordering_list('position', count_from=1))
 
     def __init__(self, title='', subtitle='', body='', posted_at='',
             user_id=0):

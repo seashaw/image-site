@@ -40,6 +40,17 @@
                 </input>
               {% endif %}
             </p>
+            <p class="position-form">
+              <label>Position:</label>
+              {{ pic_form.position(class_="position-field",
+                  readonly="", size=1, style="display: none;") }}
+              <a href="" onclick="return false;">
+                up
+              </a>
+              <a href="" onclick="return false;">
+                down
+              </a>
+            </p>
           </div> {# end col #}
         </div> {# end col #}
         {% endfor %}
@@ -68,9 +79,7 @@
   </div> {# end container #}
   {# Footer import. #}
   {% include 'footer.html' %}
-  {# Custom JavaScript import. #}
+  {# Form JavaScript import. #}
   <script type="text/javascript" charset="utf-8"
-      src="../static/js/flash.js"></script>
-  <script type="text/javascript" charset="utf-8"
-      src="../static/js/pic-select.js"></script>
+      src="../static/js/form.js"></script>
 {% endblock %}

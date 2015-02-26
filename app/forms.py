@@ -8,10 +8,10 @@ from .model import User
 from flask.ext.wtf import Form
 import wtforms
 from flask.ext.login import current_user
-from wtforms import (TextField, SubmitField, PasswordField, TextAreaField,
-        FieldList, FileField, BooleanField, FormField, RadioField)
-from wtforms.validators import (InputRequired, Length, EqualTo, ValidationError,
-        DataRequired, Email)
+from wtforms import TextField, SubmitField, PasswordField, TextAreaField, \
+        FieldList, FileField, BooleanField, FormField, RadioField, IntegerField
+from wtforms.validators import InputRequired, Length, EqualTo, \
+        ValidationError, DataRequired, Email
 
 """
 Custom validator functions.
@@ -99,6 +99,7 @@ class EditImageDataForm(wtforms.Form):
     For editing picture data.
     """
     title = TextField('Title')
+    position = IntegerField('Position')
     delete = BooleanField('Delete', default=False)
 
 class EditPostForm(CreatePostForm):

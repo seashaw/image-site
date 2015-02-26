@@ -1,11 +1,11 @@
 ﻿function flash(message, category) {
-    // Container div.
-    var div = document.createElement('div');
     if (typeof category === 'undefined') {
         var div_class = 'alert alert-message alert-dismissable';
     } else {
         var div_class = 'alert alert-' + category + ' alert-dismissable';
     }
+    // Container div.
+    var div = document.createElement('div');
     div.className = div_class;
     div.setAttribute('role', 'alert');
     // Button.

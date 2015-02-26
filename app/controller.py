@@ -109,7 +109,7 @@ def confirmUser(nonce):
     """
     Confirms user account.
     """
-    user = User.query.filter_by(confirm_nonce=nonce).one()
+    user = User.query.filter_by(confirm_nonce=nonce).first()
     if user is None:
         return abort(404)
     else:
@@ -137,7 +137,7 @@ def reconfirm():
     """
     form = ServiceRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).one()
+        user = User.query.filter_by(email=form.email.data).first()
         if not user.confirmed_at:
             # Generate cryptographic nonce with datetime.
             user.confirm_nonce = uuid.uuid4().hex
@@ -168,7 +168,7 @@ def reconfirm():
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).one()
+        user = User.query.filter_by(email=form.email.data).first()
         if user is None:
             flash("No account for '{}'".format(form.email.data), "warning")
             return redirect(url_for("login"))
@@ -216,7 +216,7 @@ def requestReset():
     """
     form = ServiceRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).one()
+        user = User.query.filter_by(email=form.email.data).first()
         # Generate cryptographic nonce with datetime.
         user.reset_nonce = uuid.uuid4().hex
         user.reset_nonce_issued_at = datetime.now(tz=utc)
@@ -245,7 +245,7 @@ def passwordReset(nonce):
     """
     Reset password form.
     """
-    user = User.query.filter_by(reset_nonce=nonce).one()
+    user = User.query.filter_by(reset_nonce=nonce).first()
     if user is None:
         return abort(404)
     else:
@@ -274,7 +274,7 @@ def viewProfile(user_name):
     """
     Display user information and profile.
     """
-    user = User.query.filter_by(user_name=user_name).one()
+    user = User.query.filter_by(user_name=user_name).first()
     return render_template('view-profile.html', user=user)
 
 @app.route('/create', methods=["GET", "POST"])
@@ -362,6 +362,7 @@ def editPost(post_id):
                 form.pic_forms.append_entry()
             for p, f in zip(post.gallery, form.pic_forms):
                 f.title.data = p.title
+                f.position.data = p.position
             form.title.data = post.title
             form.subtitle.data = post.subtitle
             form.body.data = post.body
@@ -400,9 +401,12 @@ def editPost(post_id):
                         # Remove from database and reset form field.
                         db.session.delete(pp)
                         fp.delete.data = False
-                    # Or assign new title if post renamed.
+                    # Or assign new title if pic renamed.
                     elif fp.title.data != pp.title:
                         pp.title = fp.title.data
+                    # Or assign new position if changed.
+                    elif fp.position.data != pp.position:
+                        pp.position = fp.position.data;
                 # Check form for changes and save.
                 if post.title != form.title.data:
                     post.title = form.title.data
@@ -425,7 +429,10 @@ def editPost(post_id):
                             thumb.save("{}/{}".format(thumb_dest, file_name),
                                     thumb.format)
                             # Add Picture object to post list.
-                            picture = Picture(file_name)
+                            picture = Picture(filename=file_name,
+                                    title=request.form[file_name])
+                            # Good god, a suffix to get unique input name?
+                            picture.position = request.form[file_name + '-pos']
                             post.gallery.append(picture)
                             # Really hacky way of adding form entry... 
                             form.pic_forms.append_entry()
@@ -435,10 +442,11 @@ def editPost(post_id):
                         else:
                             flash("Invalid file extension: {}".format(
                                     pic.filename), "warning")
-                # Set selected pic as post cover.
-                for pic in post.gallery:
-                    if pic.filename == request.form['choice']:
-                        post.cover = pic
+                # Update form title data and set post cover with given choice.
+                for p, f in zip(post.gallery, form.pic_forms):
+                    if p.filename == request.form['choice']:
+                        post.cover = p
+                    f.title.data = p.title
                 try:
                     db.session.commit()
                     flash("Post has been updated.", "success")
@@ -459,7 +467,7 @@ def viewPost(post_id):
     View an individual post.
     """
     post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
-            User).one()
+            User).first()
     return render_template('view-post.html', post=post)
 
 @app.route("/test", methods=["GET", "POST"])

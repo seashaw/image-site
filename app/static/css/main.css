@@ -16,3 +16,44 @@
 .foot-notice {
     text-align: center
 }
+
+h3 p {
+  font-size-adjust: 0.3;
+  text-align: right;
+}
+
+.pager .disabled {
+  outline: none;
+}
+
+
+h3 span {
+  font-size-adjust: 0.3;
+  float: right;
+}
+
+/* Media queries. */
+
+@media(max-width:767px) {
+  .thumbnail img {
+    height: 100px;
+  }
+}
+
+@media(min-width:768px) {
+  .thumbnail img {
+    height: 125px;
+  }
+}
+
+@media(min-width:992px) {
+  .thumbnail img {
+    height: 150px;
+  }
+}
+
+@media(min-width:1200px) {
+  .thumbnail img {
+    height: 175px;
+  }
+}

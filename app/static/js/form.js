@@ -87,8 +87,12 @@ function appendPic(filename) {
     position_input.className = 'position-field';
     position_input.setAttribute('type', 'text');
     position_input.setAttribute('style', 'display: none;');
-    position_input.setAttribute('value',
-            document.getElementsByClassName('position-field').length + 1);
+    var pic_fields = document.getElementsByClassName('position-field');
+    if (pic_fields == 'null') {
+        position_input.setAttribute('value', 1);
+    } else {
+        position_input.setAttribute('value', pic_fields.length + 1);
+    }
     position_input.setAttribute('size', 1);
     position_input.setAttribute('readonly', '');
     // Added suffix to prevent name conflict with title.
@@ -151,8 +155,6 @@ $('form').submit(function(event) {
     // Number of pics already in gallery post.
     var gallery_pics = $('.pic').length;
     if (gallery_pics + selected - deleted > 8) {
-        $('#pics').val('');
-        $('.selected').remove();
         event.preventDefault();
         flash("Posts cannot have more than 8 pictures.", 'warning');
     } else {

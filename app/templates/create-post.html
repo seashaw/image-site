@@ -28,12 +28,10 @@
       {{ form.submit(class_="btn btn-default") }}
     </form>
   </div> {# end row #}
-  {% include 'footer.html' %}
 </div> {# end container #}
-{# Plupload JavaScript import. #}
-<script type="text/javascript" charset="utf-8"
-    src="../static/js/plupload.full.min.js"></script>
-{# Custom JavaScript import. #}
-<script type="text/javascript" charset="utf-8"
-    src="../static/js/pic-select.js"></script>
+  {# Footer import. #}
+  {% include 'footer.html' %}
+  {# Form JavaScript import. #}
+  <script type="text/javascript" charset="utf-8"
+      src="../static/js/form.js"></script>
 {% endblock %}

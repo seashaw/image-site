@@ -10,6 +10,7 @@ Description:
 import os
 import uuid
 import math
+import re
 from datetime import datetime
 import pytz
 from pytz import timezone, utc
@@ -41,6 +42,26 @@ def allowedFile(file_name):
     return "." in file_name and file_name.rsplit(".", 1)[1] in \
             app.config["EXTENSIONS"]
 
+def renameFile(file_name):
+    """
+    Takes file_name, appends current datetime stamp, and returns it.
+    """
+    # Split off extension.
+    splits = file_name.rsplit('.', 1)
+    # Compile number finding regex.
+    rc = re.compile("-(\\d+)$")
+    # Search for existing suffix.
+    res = re.findall(rc, splits[0])
+    now = datetime.now(tz=utc)
+    stamp = "-" + str(now.year) + str(now.month) + str(now.day) + \
+            str(now.hour) + str(now.minute) + str(now.second) + \
+            str(now.microsecond)
+    # If none append new one.
+    if len(res) == 0:
+        return splits[0] + stamp + "." + splits[1]
+    # Else take integer from suffix, increment by one, and reassemble.
+    else:
+        return rc.sub(stamp, splits[0]) + "." + splits[1]
 
 """
 Routing functions, controller logic, view redirection.
@@ -310,10 +331,18 @@ def createPost():
             pics = request.files.getlist('pics')
             if len(pics) > 8:
                 flash("Posts cannot have more than 8 pictures.", "warning")
-            for pic, count in zip(pics, list(range(8))):
+            for pic in pics:
                 if allowedFile(pic.filename):
-                    # Secure filename and save picture.
+                    # Get form data.
+                    form_title = request.form[pic.filename]
+                    form_position = request.form[pic.filename + '-pos']
+                    # Create secure filename and save picture.
                     file_name = secure_filename(pic.filename)
+                    # Loop through gallery and check for file_name conflicts.
+                    # Rename if conflict found.
+                    for pp in post.gallery:
+                        if pp.title == file_name:
+                            file_name = renameFile(file_name)
                     pic.save("{}/{}".format(pic_dest, file_name))
                     # Create and save thumbnail.
                     thumb = Image.open("{}/{}".format(pic_dest, file_name))
@@ -321,7 +350,8 @@ def createPost():
                     thumb.save("{}/{}".format(thumb_dest, file_name),
                             thumb.format)
                     # Create Picture model object and add to list in post.
-                    picture = Picture(filename=file_name)
+                    picture = Picture(filename=file_name, title=form_title);
+                    picture.position = form_position
                     post.gallery.append(picture)
                     if pic.filename == request.form['choice']:
                         post.cover = picture
@@ -395,9 +425,12 @@ def editPost(post_id):
                         os.remove("{}/{}".format(thumb_dest, pp.filename))
                         post.gallery.remove(pp)
                         # If deleted pic was post cover, reassign to
-                        # first pic in gallery.
+                        # first pic in gallery or none if no more pics.
                         if pp == post.cover:
-                            post.cover = post.gallery[0]
+                            if len(post.gallery) == 0:
+                                post.cover = None
+                            else:
+                                post.cover = post.gallery[0]
                         # Remove from database and reset form field.
                         db.session.delete(pp)
                         fp.delete.data = False
@@ -419,8 +452,18 @@ def editPost(post_id):
                 if pics[0].filename:
                     for pic in pics:
                         if allowedFile(pic.filename):
-                            # Secure filename and save picture.
+                            # Get form data.
+                            form_title = request.form[pic.filename]
+                            # Good god, a suffix to get unique input name?
+                            form_position = request.form[pic.filename + '-pos']
+                            print(form_title + form_position)
+                            # Create secure filename and save picture.
                             file_name = secure_filename(pic.filename)
+                            # Loop through gallery and check for file_name
+                            # conflicts.  Rename if conflict found.
+                            for pp in post.gallery:
+                                if pp.title == file_name:
+                                    file_name = renameFile(file_name)
                             pic.save("{}/{}".format(pic_dest, file_name))
                             # Create and save thumbnail.
                             thumb = Image.open("{}/{}".format(pic_dest,
@@ -430,15 +473,16 @@ def editPost(post_id):
                                     thumb.format)
                             # Add Picture object to post list.
                             picture = Picture(filename=file_name,
-                                    title=request.form[file_name])
-                            # Good god, a suffix to get unique input name?
-                            picture.position = request.form[file_name + '-pos']
+                                    title=form_title)
+                            picture.position = form_position
                             post.gallery.append(picture)
                             # Really hacky way of adding form entry... 
                             form.pic_forms.append_entry()
                             last_index = len(form.pic_forms) - 1
                             form.pic_forms[last_index].title.data = \
                                     picture.filename
+                            form.pic_forms[last_index].position.data = \
+                                    picture.position
                         else:
                             flash("Invalid file extension: {}".format(
                                     pic.filename), "warning")

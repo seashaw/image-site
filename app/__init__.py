@@ -132,8 +132,8 @@ def onIdentityLoaded(sender, identity):
 
     # Update identity with list of posts that user authored.
     # Refers to relationship 'posts' from User model.
-    if hasattr(current_user, 'postings'):
-        for post in current_user.postings:
+    if hasattr(current_user, 'posts'):
+        for post in current_user.posts:
             identity.provides.add(EditBlogPostNeed(str(post.id)))
 
 # Controller import.

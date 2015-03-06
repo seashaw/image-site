@@ -99,7 +99,7 @@ class EditImageDataForm(wtforms.Form):
     For editing picture data.
     """
     title = TextField('Title')
-    position = IntegerField('Position')
+    position = IntegerField('position')
     delete = BooleanField('Delete', default=False)
 
 class EditPostForm(CreatePostForm):
@@ -108,3 +108,11 @@ class EditPostForm(CreatePostForm):
     """
     pic_forms = FieldList(FormField(EditImageDataForm))
     submit = SubmitField("Update")
+
+class CommentForm(Form):
+    """
+    Form for adding comments to post.
+    """
+    body = TextAreaField('Leave a comment', validators=[InputRequired()])
+    parent_id = IntegerField('Parent ID', default=0)
+    submit = SubmitField("Comment")

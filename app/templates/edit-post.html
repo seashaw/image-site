@@ -22,10 +22,14 @@
             </a>
           </div> {# end col #}
           <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            {{ pic_form.title.label }}
-            {{ pic_form.title }}
-            {{ pic_form.delete.label }}
-            {{ pic_form.delete }}
+            <div class='form-group'>
+              {{ pic_form.title.label }}
+              {{ pic_form.title(class_='form-control') }}
+            </div>
+            <div class='form-group'>
+              {{ pic_form.delete.label }}:
+              {{ pic_form.delete }}
+            </div>
             <p>
               <label>Select as cover:</label>
               {% if post.cover.filename == gallery_pic.filename: %}
@@ -79,5 +83,5 @@
   {% include 'footer.html' %}
   {# Form JavaScript import. #}
   <script type="text/javascript" charset="utf-8"
-      src="../static/js/form.js"></script>
+      src="../static/js/post.js"></script>
 {% endblock %}

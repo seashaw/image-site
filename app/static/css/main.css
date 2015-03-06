@@ -32,6 +32,14 @@ h3 span {
   float: right;
 }
 
+#parent_id {
+    display: none;
+}
+
+.hide {
+    display: none;
+}
+
 /* Media queries. */
 
 @media(max-width:767px) {

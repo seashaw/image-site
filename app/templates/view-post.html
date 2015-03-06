@@ -6,15 +6,15 @@
   <div class="container">
     <div class="row">
       <h3>
-        {{ post.Post.title }}
+        {{ post.title }}
         <span>
-          published by {{ post.user_name }} on 
-          {{ post.Post.posted_at.strftime("%a, %b %d, %Y at %I:%M%p") }}
+          published by {{ post.user.user_name }} on 
+          {{ post.posted_at.strftime("%a, %b %d, %Y at %I:%M%p") }}
         </span>
       </h3>
     </div> {# end row #}
     <div class="row">
-      {% if post.Post.gallery %}
+      {% if post.gallery %}
         {# Gallery widget. #}
         <div id="blueimp-gallery"
             class="blueimp-gallery blueimp-gallery-controls">
@@ -28,13 +28,13 @@
         </div>
         {# Gallery picture thumbnails and links. #}
         <div id="links" class="links">
-          {% for pic in post.Post.gallery %}
+          {% for pic in post.gallery %}
             <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
               <a href="../static/uploads/{{ '{}/{}/{}'.format(
-                  post.Post.user_id, post.Post.id, pic.filename) }}"
+                  post.user_id, post.id, pic.filename) }}"
                   title="{{ pic.title }}" class="thumbnail">
                 <img src="../static/uploads/{{ '{}/{}/thumbnails/{}'.format(
-                    post.Post.user_id, post.Post.id, pic.filename) }}"
+                    post.user_id, post.id, pic.filename) }}"
                     alt="{{ pic.title }}"
                     class="img-responsive img-rounded">
               </a>
@@ -45,16 +45,48 @@
     </div> {# end row #}
     <div class="row">
       <h4>
-        {{ post.Post.subtitle }}
+        {{ post.subtitle }}
       </h4>
       <p>
-        {{ post.Post.body }}
+        {{ post.body }}
       </p>
     </div> {# end row #}
+    {% if current_user.is_authenticated() %}
+    <div id='comment' class='row'>
+      {{ form.body.label }}
+      <form action="/view/{{ post.id }}" method=post
+          accept-charset="utf-8">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.body(class_='form-control') }}
+          {{ form.submit(class_='btn btn-default') }}
+          {{ form.parent_id(readonly=true) }}
+        </div>
+      </form>
+    </div>
+    {% endif %}
+    <div class="row">
+      {% for comment in post.comments recursive %}
+        <div class="col-xs-11">
+            {{ comment.user.user_name }} - {{ comment.body }}
+          {% if current_user.is_authenticated() %}
+            <a class="reply" name="{{ comment.id }}" href=""
+                onclick="return false;">
+              Reply
+            </a>
+            <a class="cancel" href="" onclick="return false;">
+              Cancel
+            </a>
+          {% endif %}
+          {% if comment.children %}
+            {{ loop(comment.children) }}
+          {% endif %}
+        </div> {# end col #}
+      {% endfor %}
+    </div>  {# end row #}
   </div> {# end container #}
   {# Footer import. #}
-  {% include 'footer.html' %}
-  {# JavaScript imports. #}
+  {% include 'footer.html' %} {# JavaScript imports. #}
   {# Gallery import. #}
   <script type="text/javascript" charset="utf-8"
       src="../static/js/blueimp-gallery.js"></script>

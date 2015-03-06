@@ -25,9 +25,10 @@ from flask.ext.mail import Message
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 
 from . import app, bc, mail, db, EditBlogPostPermission
-from .model import User, Post, Picture
-from .forms import (LoginForm, RegisterForm, CreatePostForm,  EditPostForm,
-        ServiceRequestForm, PasswordResetForm, EditImageDataForm, RadioField)
+from .model import User, Post, Picture, Comment
+from .forms import LoginForm, RegisterForm, CreatePostForm,  EditPostForm, \
+        ServiceRequestForm, PasswordResetForm, EditImageDataForm, RadioField, \
+        CommentForm
 
 """
 Helper functions.
@@ -49,17 +50,17 @@ def renameFile(file_name):
     # Split off extension.
     splits = file_name.rsplit('.', 1)
     # Compile number finding regex.
-    rc = re.compile("-(\\d+)$")
-    # Search for existing suffix.
+    rc = re.compile("-cp:(\\d+)$")
+    # Search for existing copy timestamp.
     res = re.findall(rc, splits[0])
     now = datetime.now(tz=utc)
-    stamp = "-" + str(now.year) + str(now.month) + str(now.day) + \
+    stamp = "-cp:" + str(now.year) + str(now.month) + str(now.day) + \
             str(now.hour) + str(now.minute) + str(now.second) + \
             str(now.microsecond)
     # If none append new one.
     if len(res) == 0:
         return splits[0] + stamp + "." + splits[1]
-    # Else take integer from suffix, increment by one, and reassemble.
+    # Else replace old one with new one.
     else:
         return rc.sub(stamp, splits[0]) + "." + splits[1]
 
@@ -508,11 +509,27 @@ def editPost(post_id):
 @app.route('/view/<post_id>', methods=["GET", "POST"])
 def viewPost(post_id):
     """
-    View an individual post.
+    View an individual post and handle comment posting.
     """
-    post = db.session.query(Post, User.user_name).filter_by(id=post_id).join(
-            User).first()
-    return render_template('view-post.html', post=post)
+    post = Post.query.get(post_id)
+    form = CommentForm()
+    if form.validate_on_submit():
+        # Might need to check form.parent_id for null value.
+        comment = Comment(body=form.body.data, posted_at=datetime.now(tz=utc),
+                user_id=current_user.id, post_id=post.id)
+        # If no parent_id suppplied, then comment.parent_id is null.
+        if form.parent_id.data == 0:
+            comment.parent_id = None
+        else:
+            comment.parent_id = form.parent_id.data
+        db.session.add(comment)
+        try:
+            db.session.commit()
+            flash("Comment has been posted.", "success")
+        except Exception as e:
+            flash("There was an error posting your comment.", "danger")
+        return redirect(url_for('viewPost', post_id=post_id))
+    return render_template('view-post.html', post=post, form=form)
 
 @app.route("/test", methods=["GET", "POST"])
 def test():

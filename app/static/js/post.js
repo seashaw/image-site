@@ -1,12 +1,9 @@
-﻿function attachClickEventListener(pos_form) {
+﻿function clickEventListener(pos_form) {
     var children = pos_form.children;
     children[2].addEventListener("click", function(event) {
         event.preventDefault();
         var elem1 = event.target.parentNode.parentNode.parentNode;
-        var elem2 = elem1.previousSibling;
-        while (elem2.nodeName != 'DIV' && elem2 != 'null') {
-            elem2 = elem2.previousSibling;
-        }
+        var elem2 = elem1.previousElementSibling;
         if (elem2 != 'null') {
             var pos1 = elem1.querySelector('.position-field');
             var pos2 = elem2.querySelector('.position-field');
@@ -19,10 +16,7 @@
     children[3].addEventListener("click", function(event) {
         event.preventDefault();
         var elem1 = event.target.parentNode.parentNode.parentNode;
-        var elem2 = elem1.nextSibling;
-        while (elem2.nodeType == 3) {
-            elem2 = elem2.nextSibling;
-        }
+        var elem2 = elem1.nextElementSibling;
         if (elem2 != 'null') {
             var pos1 = elem1.querySelector('.position-field');
             var pos2 = elem2.querySelector('.position-field');
@@ -115,7 +109,7 @@ function appendPic(filename) {
     position.appendChild(position_up);
     position.appendChild(position_down);
     // Attach click handler.
-    attachClickEventListener(position);
+    clickEventListener(position);
     radio.appendChild(radio_label);
     radio.appendChild(radio_input);
     form.appendChild(title_label);
@@ -140,7 +134,9 @@ var field = document.getElementById('picfield');
 // Shuffles around pic forms and updates position form field.
 var pos_forms = document.getElementsByClassName('position-form');
 for (var i = 0; i < pos_forms.length; i++) {
-    attachClickEventListener(pos_forms[i]);
+    // Attach click event listener to picture forms.
+    // Used for moving forms around.
+    clickEventListener(pos_forms[i]);
 }
 
 // Ensures that radio is checked when form is submitted.

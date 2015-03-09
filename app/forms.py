@@ -11,7 +11,7 @@ from flask.ext.login import current_user
 from wtforms import TextField, SubmitField, PasswordField, TextAreaField, \
         FieldList, FileField, BooleanField, FormField, RadioField, IntegerField
 from wtforms.validators import InputRequired, Length, EqualTo, \
-        ValidationError, DataRequired, Email
+        ValidationError, DataRequired, Email, Optional
 
 """
 Custom validator functions.
@@ -24,11 +24,11 @@ def uniqueEmailCheck(form, field):
     if User.query.filter_by(email=field.data).first():
         raise ValidationError('"{}" is already registered'.format(field.data))
 
-def emailExistsCheck(form, field):
+def userNameExistsCheck(form, field):
     """
-    Ensures that email address exists in the database.
+    Ensures that user with user_name exists in the database.
     """
-    if not User.query.filter_by(email=field.data).first():
+    if not User.query.filter_by(user_name=field.data).first():
         raise ValidationError('"{}" is not registered'.format(field.data))
 
 def uniqueUserNameCheck(form, field):
@@ -46,8 +46,8 @@ class LoginForm(Form):
     """
     User authentication.
     """
-    email = TextField("Email", validators=[InputRequired(),
-            Email(message="Invalid email address format.")])
+    user_name = TextField("User", validators=[InputRequired(),
+        userNameExistsCheck])
     password = PasswordField("Password", validators=[InputRequired()])
     submit = SubmitField("Login")
 
@@ -55,8 +55,10 @@ class RegisterForm(Form):
     """
     User registration.
     """
-    email = TextField("Email", validators=[InputRequired(),
-            Email(message="Invalid email address format."), uniqueEmailCheck])
+    email = TextField("Email",
+            validators=[Optional(),
+            Email(message="Invalid email address format."),
+            uniqueEmailCheck])
     user_name = TextField("User Name", validators=[DataRequired(),
             uniqueUserNameCheck])
     password = PasswordField("New Password", validators=[InputRequired(),
@@ -70,7 +72,7 @@ class ServiceRequestForm(Form):
     """
     Allows users to input their email to process service requests.
     """
-    email = TextField("Email", validators=[InputRequired(), emailExistsCheck] )
+    email = TextField("Email", validators=[InputRequired()] )
     submit = SubmitField("Send Request")
 
 class PasswordResetForm(Form):

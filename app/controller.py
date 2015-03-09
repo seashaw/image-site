@@ -24,8 +24,10 @@ from flask.ext.login import (login_required, login_user, logout_user,
 from flask.ext.mail import Message
 from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 
-from . import app, bc, mail, db, EditBlogPostPermission
-from .model import User, Post, Picture, Comment
+from . import app, bc, mail, db
+from .roles import EditBlogPostPermission, activeRole, verifiedRole, \
+        adminRole, active_permission, verified_permission
+from .model import User, Post, Picture, Comment, Role
 from .forms import LoginForm, RegisterForm, CreatePostForm,  EditPostForm, \
         ServiceRequestForm, PasswordResetForm, EditImageDataForm, RadioField, \
         CommentForm
@@ -99,30 +101,35 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         # Feed form data into User object creation.
-        user = User(email=form.email.data,
-                password=bc.generate_password_hash(form.password.data,
+        user = User(password=bc.generate_password_hash(form.password.data,
                 rounds=12), user_name=form.user_name.data)
-        # Generate cryptographic nonce with datetime.
-        user.confirm_nonce = uuid.uuid4().hex
-        user.confirm_nonce_issued_at = datetime.now(tz=utc)
+        user.roles.append(activeRole())
+        if form.email.data:
+            user.email = form.email.data
+            # Generate cryptographic nonce with datetime.
+            user.confirm_nonce = uuid.uuid4().hex
+            user.confirm_nonce_issued_at = datetime.now(tz=utc)
+            try:
+                # URL for user confirmation.
+                confirm_url = url_for("confirmUser", nonce=user.confirm_nonce,
+                        _external=True)
+                # Create and send confirmation email.
+                subject = "Please confirm your account."
+                html = "Click <a href='{}'>here</a> to confirm.".format(
+                        confirm_url)
+                msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
+                        recipients=[user.email], html=html)
+                mail.send(msg)
+                flash("Confirmation email sent.", "info")
+            except Exception as e:
+                flash("Failed to send confirmation email.", "danger")
         try:
-            # Add new users to session and commit.
             db.session.add(user)
             db.session.commit()
-            # URL for user confirmation.
-            confirm_url = url_for("confirmUser", nonce=user.confirm_nonce,
-                    _external=True)
-            # Create and send confirmation email.
-            subject = "Please confirm your account."
-            html = "Click <a href='{}'>here</a> to confirm.".format(
-                    confirm_url)
-            msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
-                    recipients=[user.email], html=html)
-            mail.send(msg)
-            flash("Confirmation email sent.", "info")
+            flash("Registration succesful.  You may now sign-in.", "success")
             return redirect(request.args.get("next") or url_for("login"))
         except Exception as e:
-            flash("Registration failed.", "danger")
+            flash("User creation failed.", "danger")
             return redirect(url_for("login"))
     return render_template("register.html", form=form)
 
@@ -144,12 +151,16 @@ def confirmUser(nonce):
                 os.mkdir(path)
                 os.chmod(path, mode=0o777)
                 user.confirmed_at = now
+                user.roles.append(verifiedRole())
                 flash("Account confirmation successful.", "success")
             else:
                 flash("Account already confirmed.", "warning")
         user.confirm_nonce = None
         user.confirm_nonce_issued_at = None
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception as e:
+            flash("User confirmation failed", 'danger')
         return redirect(url_for("login"))
 
 @app.route("/reconfirm", methods=["GET", "POST"])
@@ -159,8 +170,8 @@ def reconfirm():
     """
     form = ServiceRequestForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if not user.confirmed_at:
+        user = user.query.filter_by(email=form.email.data).first()
+        if user and not user.confirmed_at:
             # Generate cryptographic nonce with datetime.
             user.confirm_nonce = uuid.uuid4().hex
             user.confirm_nonce_issued_at = datetime.now(tz=utc)
@@ -186,21 +197,54 @@ def reconfirm():
         return redirect(url_for("login"))
     return render_template("reconfirm.html", form=form)
 
+@app.route("/verify/<user_name>", methods=["GET", "POST"])
+@login_required
+@active_permission.require()
+def verify(user_name):
+    """
+    Allows users to request a confirmation link to verify account.
+    """
+    form = ServiceRequestForm()
+    if current_user.user_name != user_name:
+        abort(404)
+    if form.validate_on_submit():
+        print(form.email.data)
+        user = User.query.filter_by(user_name=user_name).first()
+        # Generate cryptographic nonce with datetime.
+        user.email = form.email.data
+        user.confirm_nonce = uuid.uuid4().hex
+        user.confirm_nonce_issued_at = datetime.now(tz=utc)
+        try:
+            db.session.commit()
+            # URL for user confirmation.
+            confirm_url = url_for("confirmUser", nonce=user.confirm_nonce,
+                    _external=True)
+            # Create and send confirmation email.
+            subject = "Please confirm your account."
+            html = "Click <a href='{}'>here</a> to confirm.".format(
+                    confirm_url)
+            msg = Message(sender=app.config["MAIL_USERNAME"],
+                    subject=subject, recipients=[user.email], html=html)
+            mail.send(msg)
+            flash("Confirmation email sent.", "info")
+            return redirect(request.args.get("next") or url_for("login"))
+        except Exception as e:
+            flash("Confirmation request failed.", "danger")
+            return redirect(url_for("login"))
+        return redirect(url_for("login"))
+    return render_template('verify.html', form=form)
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(user_name=form.user_name.data).first()
         if user is None:
-            flash("No account for '{}'".format(form.email.data), "warning")
+            flash("No account for '{}'".format(form.user_name.data), "warning")
             return redirect(url_for("login"))
-        elif not user.confirmed_at:
-            flash("Account is not yet confirmed.  "
-                    "Check your email for a confirmation link.", "warning")
-            return redirect(url_for("login"))
-        elif user.active is False:
-            flash("Account has been deactivated, contact support.", "warning")
-            return redirect(url_for("index"))
+        elif activeRole() not in user.roles:
+            flash("Account has been deactivated.  Contact support.", 'warning')
+            return redirect(url_for('index'))
         else: 
             if bc.check_password_hash(user.password, form.password.data):
                 login_user(user)
@@ -210,7 +254,7 @@ def login():
                 flash("Login successful.", "success")
                 return redirect(request.args.get("next") or url_for("index"))
             else:
-                flash("Incorrect email / password.", "warning")
+                flash("Incorrect password.", "warning")
                 return redirect(url_for("login"))
     return render_template("login.html", form=form)
 
@@ -239,27 +283,30 @@ def requestReset():
     form = ServiceRequestForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
-        # Generate cryptographic nonce with datetime.
-        user.reset_nonce = uuid.uuid4().hex
-        user.reset_nonce_issued_at = datetime.now(tz=utc)
-        try:
-            db.session.commit()
-            # URL for user confirmation.
-            confirm_url = url_for("passwordReset", nonce=user.reset_nonce,
-                    _external=True)
-            # Create and send confirmation email.
-            subject = "Password reset request."
-            html = "Click <a href='{}'>here</a> to reset password.".format(
-                    confirm_url)
-            msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
-                    recipients=[user.email], html=html)
-            mail.send(msg)
-            flash("Check your email for instructions to reset your password.",
-                    "info")
-            return redirect(request.args.get("next") or url_for("login"))
-        except Exception as e:
-            flash("Request failed.", "danger")
-            return redirect(url_for("login"))
+        if user:
+            # Generate cryptographic nonce with datetime.
+            user.reset_nonce = uuid.uuid4().hex
+            user.reset_nonce_issued_at = datetime.now(tz=utc)
+            try:
+                db.session.commit()
+                # URL for user confirmation.
+                confirm_url = url_for("passwordReset", nonce=user.reset_nonce,
+                        _external=True)
+                # Create and send confirmation email.
+                subject = "Password reset request."
+                html = "Click <a href='{}'>here</a> to reset password.".format(
+                        confirm_url)
+                msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
+                        recipients=[user.email], html=html)
+                mail.send(msg)
+                flash("Check your email for instructions to reset your password.",
+                        "info")
+                return redirect(request.args.get("next") or url_for("login"))
+            except Exception as e:
+                flash("Request failed.", "danger")
+                return redirect(url_for("login"))
+        else:
+            flash("Invalid email.", 'warning')
     return render_template("reset-request.html", form=form)
 
 @app.route("/reset/<nonce>", methods=["GET", "POST"])
@@ -297,14 +344,21 @@ def viewProfile(user_name):
     Display user information and profile.
     """
     user = User.query.filter_by(user_name=user_name).first()
-    return render_template('view-profile.html', user=user)
+    return render_template('view-profile.html', user=user,
+            verified=verified_permission.can())
 
 @app.route('/create', methods=["GET", "POST"])
 @login_required
+@active_permission.require()
 def createPost():
     """
     Create, save, and post new entries.
     """
+    if current_user.posts and (datetime.now(tz=utc) -
+            current_user.posts[-1].posted_at).days <= 1 and \
+            verified_permission.can() is False:
+        flash("You can only post once per day", 'warning')
+        return redirect(url_for('index'))
     form = CreatePostForm()
     if form.validate_on_submit():
         # Feed form data into post object.
@@ -377,6 +431,7 @@ def userPosts():
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
 @login_required
+@active_permission.require()
 def editPost(post_id):
     """
     Editing existing posts.
@@ -457,7 +512,6 @@ def editPost(post_id):
                             form_title = request.form[pic.filename]
                             # Good god, a suffix to get unique input name?
                             form_position = request.form[pic.filename + '-pos']
-                            print(form_title + form_position)
                             # Create secure filename and save picture.
                             file_name = secure_filename(pic.filename)
                             # Loop through gallery and check for file_name

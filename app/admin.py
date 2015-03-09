@@ -6,7 +6,7 @@ Description:
     Administrative views.
 """
 
-from flask.ext.principal import Permission, RoleNeed
+from .roles import admin_permission
 from flask.ext.admin import expose, BaseView, AdminIndexView
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin.contrib.fileadmin import FileAdmin
@@ -19,7 +19,6 @@ class HomeView(AdminIndexView):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
 class UsersView(ModelView):
@@ -34,7 +33,6 @@ class UsersView(ModelView):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
 class RolesView(ModelView):
@@ -49,7 +47,6 @@ class RolesView(ModelView):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
 class PostsView(ModelView):
@@ -64,7 +61,6 @@ class PostsView(ModelView):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
 class PicturesView(ModelView):
@@ -79,7 +75,6 @@ class PicturesView(ModelView):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()
 
 class FileView(FileAdmin):
@@ -91,5 +86,4 @@ class FileView(FileAdmin):
         """
         Restrict access to authenticated users.
         """
-        admin_permission = Permission(RoleNeed('Administrator'))
         return admin_permission.can()

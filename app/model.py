@@ -32,9 +32,8 @@ class User(db.Model, UserMixin):
     """
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), unique=True, index=True)
+    email = db.Column(db.String(255), nullable=True, unique=True, index=True)
     password = db.Column(db.String(255))
-    active = db.Column(db.Boolean, default=True)
     user_name = db.Column(db.String(80), unique=True, index=True)
     confirmed_at = db.Column(db.DateTime(timezone=True), nullable=True)
     confirm_nonce = db.Column(db.String(), unique=True, nullable=True)
@@ -49,9 +48,7 @@ class User(db.Model, UserMixin):
     posts = db.relationship('Post', backref='user', order_by="Post.id")
     comments = db.relationship('Comment', backref='user', order_by="Comment.id")
 
-    def __init__(self, email='', password='', active=True, user_name='',
-            roles=[], posts=[]):
-        self.email = email
+    def __init__(self, password='', user_name=''):
         self.password = password
         self.user_name = user_name
 

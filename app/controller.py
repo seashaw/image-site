@@ -16,6 +16,7 @@ import pytz
 from pytz import timezone, utc
 from PIL import Image
 from werkzeug import secure_filename
+from sqlalchemy import desc
 
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session, abort)
@@ -78,20 +79,33 @@ def index(page):
     Application index, contains list of recent posts.
     """
     # Number of posts per page.
-    ppp = 2
+    ppp = 1
+    # Limit of range of pagination in each direction.
+    range_limit = 2
     # Get posts for page.
-    posts = db.session.query(Post, User).join(User).order_by(
-            Post.id.desc()).offset((page-1) * ppp).limit(ppp).all()
+    posts = Post.query.order_by(desc("id")).offset(
+            (page-1) * ppp).limit(ppp).all()
     # Get total number of posts and divide into number of pages.
     count = Post.query.count() # Is this the best way to get count?
     pages = math.ceil(count / ppp)
+    if page - range_limit - 1 < 0:
+        prev = 0
+    else:
+        prev = page - range_limit - 1
+    if page + range_limit + 1 > pages + 1:
+        next = pages + 1
+    else:
+        next = page + range_limit + 1
+    page_range = list(range(prev+1, next))
+    if next > pages:
+        next = 0
     # Check if end was reached.
     if len(posts) < ppp or page == pages:
         end = True
     else:
         end = False
-    return render_template("index.html", posts=posts, page=page, pages=pages,
-            end=end)
+    return render_template("index.html", posts=posts, page=page, end=end,
+            page_range=page_range)
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -199,7 +213,7 @@ def reconfirm():
 
 @app.route("/verify/<user_name>", methods=["GET", "POST"])
 @login_required
-@active_permission.require()
+@active_permission.require(http_exception=403)
 def verify(user_name):
     """
     Allows users to request a confirmation link to verify account.
@@ -349,7 +363,7 @@ def viewProfile(user_name):
 
 @app.route('/create', methods=["GET", "POST"])
 @login_required
-@active_permission.require()
+@active_permission.require(http_exception=403)
 def createPost():
     """
     Create, save, and post new entries.
@@ -431,7 +445,7 @@ def userPosts():
 
 @app.route('/edit/<post_id>', methods=["GET", "POST"])
 @login_required
-@active_permission.require()
+@active_permission.require(http_exception=403)
 def editPost(post_id):
     """
     Editing existing posts.

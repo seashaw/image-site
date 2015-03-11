@@ -8,29 +8,29 @@
             <div class="caption">
               <h3>
                 <a href="{{ url_for('viewPost',
-                    post_id=post.Post.id) }}">
-                  {{ post.Post.title }}
+                    post_id=post.id) }}">
+                  {{ post.title }}
                 </a>
                 <p>
                   posted 
-                  {{ post.Post.posted_at.strftime(
+                  {{ post.posted_at.strftime(
                       "%a, %b %d, %Y at %I:%M%p") }}
                   by 
                   <a href="{{ url_for('viewProfile',
-                      user_name=post.User.user_name) }}">
-                    {{ post.User.user_name }}
+                      user_name=post.user.user_name) }}">
+                    {{ post.user.user_name }}
                   </a> 
                 </p>
               </h3>
             </div> {# end caption #}
-            {% if post.Post.gallery %}
+            {% if post.gallery %}
               <a href="{{ url_for('viewPost',
-                  post_id=post.Post.id) }}">
+                  post_id=post.id) }}">
                 <img src="{{ '/static/uploads/{}/{}/{}'.format(
-                    post.Post.user_id, post.Post.id,
-                    post.Post.cover.filename) }}"
+                    post.user_id, post.id,
+                    post.cover.filename) }}"
                     class="img-responsive img-rounded"
-                    alt="{{ post.Post.cover.title }}">
+                    alt="{{ post.cover.title }}">
               </a>
             {% endif %}
           </div> {# end thumbnail #}
@@ -46,15 +46,7 @@
         <nav>
           <ul class="pagination">
             {% if pages != 1 %}
-              {% if page == 1 %}
-                <li class="disabled">
-                  <a href="" aria-label="Previous" onclick="return false">
-                    <span aria-hidden="true">
-                      &laquo;
-                    </span>
-                  </a>
-                </li>
-              {% else %}
+              {% if page != 1 %}
                 <li>
                   <a href="/index/{{ page - 1 }}" aria-label="Previous">
                     <span aria-hidden="true">
@@ -63,7 +55,7 @@
                   </a>
                 </li>
               {% endif %}
-              {% for i in range(1, pages+1) %}
+              {% for i in page_range %}
                 {% if i == page %}
                   <li class="active">
                     <a href="" onclick="return false">
@@ -81,15 +73,7 @@
                   </li>
                 {% endif %}
               {% endfor %}
-              {% if end %}
-                <li class="disabled">
-                  <a href="" aria-label="Next" onclick="return false">
-                    <span aria-hidden="true">
-                      &raquo;
-                    </span>
-                  </a>
-                </li>
-              {% else %}
+              {% if not end %}
                 <li>
                   <a href="/index/{{ page + 1 }}" aria-label="Next">
                     <span aria-hidden="true">

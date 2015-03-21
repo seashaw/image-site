@@ -27,7 +27,6 @@
         <span class="icon-bar"></span>
       </button>
 
-      {# Finding Clooney brand.#}
       <a class="navbar-brand" href="{{ url_for('index') }}">
         Angry Hos
       </a>
@@ -37,58 +36,25 @@
         {# User name and log in/out links. #}
         {% if current_user.is_authenticated() %}
           <li>
-            <a href="{{ url_for('createPost') }}">
+            <a id="create-post" href="{{ url_for('createPost') }}">
               New Post
             </a>
           </li>
           <li>
-            <a href="#">
-              Contact
+            <a href="{{ url_for('viewProfile',
+                user_name=current_user.user_name) }}">
+              Profile
             </a>
           </li>
+          <li class="divider"></li>
           <li>
-            <a href="#">
-              About
+            <a id="logout" href="{{ url_for('logout') }}">
+              Logout
             </a>
           </li>
-          <li class="dropdown">
-            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-              {{ current_user.user_name }}
-              <span class="caret"></span>
-            </a>
-            <ul class="dropdown-menu" role="menu">
-              <li>
-                <a href="{{ url_for('viewProfile',
-                    user_name=current_user.user_name) }}">
-                  Profile
-                </a>
-              </li>
-              <li>
-                <a href="{{ url_for('userPosts') }}">
-                  Posts
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  Inbox
-                </a>
-              </li>
-              <li class="divider"></li>
-              <li>
-                <a href="{{ url_for('logout') }}">
-                  Logout
-                </a>
-              </li>
-            </ul> {# end dropdown-menu #}
-          </li> {# end dropdown #}
         {% else %}
           <li>
-            <a href="#">
-              About
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('login') }}">
+            <a id="login" href="{{ url_for('login') }}">
               Login
             </a>
           </li>

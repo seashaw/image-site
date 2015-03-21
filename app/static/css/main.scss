@@ -1,0 +1,109 @@
+﻿/* *
+ * Fonts.
+ */
+
+/* Brand. */
+@font-face {
+    font-family: destroy;
+    src: url(destroy.woff);
+}
+
+/* *
+ * Top-down styling for page.
+ */
+
+/* Navbar background color. */
+$navColor: #FF9800;
+
+/* Page background color. */
+$backColor: #FF9800;
+
+/* Page foreground color. */
+$foreColor: #FF9800;
+
+/* Title text color. */
+$titleText: #F4C04A;
+
+/* Body text color. */
+$bodyText: #770600;
+
+.navbar {
+    background-color: $navColor;
+    border: none;
+
+    .navbar-brand {
+        font-family: destroy;
+        font-size: 2em;
+        color: $titleText;
+    }
+
+    .nav li a {
+        color: $titleText;
+    }
+}
+
+body {
+    background-color: $backColor;
+}
+
+.thumbnail {
+    background-color: $foreColor;
+    border: none;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-bottom: 0px;
+
+    .caption {
+        h3 {
+            color: $bodyText;
+        }
+    }
+}
+
+.footer {
+    background-color: $navColor;
+
+    .foot-notice {
+        text-align: center;
+        color: $titleText;
+    }
+}
+
+/**
+ * Form styling.
+ */
+
+#parent_id {
+    display: none;
+}
+
+textarea {
+    background-color: #F2AF3E;
+}
+
+
+/* Media queries. */
+
+@media(max-width:767px) {
+  .thumbnail img {
+    height: 100px;
+  }
+}
+
+@media(min-width:768px) {
+  .thumbnail img {
+    height: 125px;
+  }
+}
+
+@media(min-width:992px) {
+  .thumbnail img {
+    height: 150px;
+  }
+}
+
+@media(min-width:1200px) {
+  .thumbnail img {
+    height: 175px;
+  }
+}

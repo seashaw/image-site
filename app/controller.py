@@ -79,9 +79,9 @@ def index(page):
     Application index, contains list of recent posts.
     """
     # Number of posts per page.
-    ppp = 1
-    # Limit of range of pagination in each direction.
-    range_limit = 2
+    ppp = 7
+    # Limit of range of pagination.
+    range_limit = 10
     # Get posts for page.
     posts = Post.query.order_by(desc("id")).offset(
             (page-1) * ppp).limit(ppp).all()
@@ -427,9 +427,10 @@ def createPost():
         # Commit changes to database.
         try:
             db.session.commit()
+            flash("Post published successfully.", 'success')
             return redirect(url_for('index'))
         except Exception as e:
-            flash("Post creation failed.", "danger")
+            flash("Post creation failed.", 'danger')
             return redirect(url_for("createPost"))
     return render_template('create-post.html', form=form)
 
@@ -504,11 +505,11 @@ def editPost(post_id):
                         # Remove from database and reset form field.
                         db.session.delete(pp)
                         fp.delete.data = False
-                    # Or assign new title if pic renamed.
-                    elif fp.title.data != pp.title:
+                    # Assign new title if pic renamed.
+                    if fp.title.data != pp.title:
                         pp.title = fp.title.data
-                    # Or assign new position if changed.
-                    elif fp.position.data != pp.position:
+                    # Assign new position if changed.
+                    if fp.position.data != pp.position:
                         pp.position = fp.position.data;
                 # Check form for changes and save.
                 if post.title != form.title.data:
@@ -563,6 +564,7 @@ def editPost(post_id):
                 try:
                     db.session.commit()
                     flash("Post has been updated.", "success")
+                    return redirect(url_for('viewPost', post_id=post_id))
                 except Exception as e:
                     flash("Error saving post data.", "danger")
             else:
@@ -598,15 +600,3 @@ def viewPost(post_id):
             flash("There was an error posting your comment.", "danger")
         return redirect(url_for('viewPost', post_id=post_id))
     return render_template('view-post.html', post=post, form=form)
-
-@app.route("/test", methods=["GET", "POST"])
-def test():
-    """
-    endpoint for testing
-    """
-    if request.method == 'POST':
-        files = request.files.getlist('file')
-        for file in files:
-            print(file.filename)
-        print(request.form['choice'])
-    return render_template('test.html')

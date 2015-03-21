@@ -1,67 +1,67 @@
+/* *
+ * Fonts.
+ */
+/* Brand. */
 @font-face {
-    font-family: district;
-    src: url(district.woff);
-}
-
-@font-face {
-    font-family: destroy;
-    src: url(destroy.woff);
-}
-
-.navbar-default .navbar-brand {
+  font-family: destroy;
+  src: url(destroy.woff); }
+/* *
+ * Top-down styling for page.
+ */
+/* Navbar background color. */
+/* Page background color. */
+/* Page foreground color. */
+/* Title text color. */
+/* Body text color. */
+.navbar {
+  background-color: #FF9800;
+  border: none; }
+  .navbar .navbar-brand {
     font-family: destroy;
     font-size: 2em;
-}
+    color: #F4C04A; }
+  .navbar .nav li a {
+    color: #F4C04A; }
 
-.foot-notice {
-    text-align: center
-}
+body {
+  background-color: #FF9800; }
 
-h3 p {
-  font-size-adjust: 0.3;
-  text-align: right;
-}
+.thumbnail {
+  background-color: #FF9800;
+  border: none;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 0px; }
+  .thumbnail .caption h3 {
+    color: #770600; }
 
-.pager .disabled {
-  outline: none;
-}
+.footer {
+  background-color: #FF9800; }
+  .footer .foot-notice {
+    text-align: center;
+    color: #F4C04A; }
 
-
-h3 span {
-  font-size-adjust: 0.3;
-  float: right;
-}
-
+/**
+ * Form styling.
+ */
 #parent_id {
-    display: none;
-}
+  display: none; }
 
-.hide {
-    display: none;
-}
+textarea {
+  background-color: #F2AF3E; }
 
 /* Media queries. */
-
-@media(max-width:767px) {
+@media (max-width: 767px) {
   .thumbnail img {
-    height: 100px;
-  }
-}
-
-@media(min-width:768px) {
+    height: 100px; } }
+@media (min-width: 768px) {
   .thumbnail img {
-    height: 125px;
-  }
-}
-
-@media(min-width:992px) {
+    height: 125px; } }
+@media (min-width: 992px) {
   .thumbnail img {
-    height: 150px;
-  }
-}
-
-@media(min-width:1200px) {
+    height: 150px; } }
+@media (min-width: 1200px) {
   .thumbnail img {
-    height: 175px;
-  }
-}
+    height: 175px; } }
+
+/*# sourceMappingURL=main.css.map */

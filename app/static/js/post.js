@@ -57,6 +57,7 @@ function appendPic(filename) {
     title_label.innerHTML = "Title";
     // Title input.
     var title_input = document.createElement('input');
+    title_input.className = "title";
     title_input.setAttribute('type', 'text');
     title_input.setAttribute('value', filename);
     title_input.setAttribute('name', filename);
@@ -93,11 +94,13 @@ function appendPic(filename) {
     position_input.setAttribute('name', filename + '-pos');
     // Position up link.
     var position_up = document.createElement('a');
+    position_up.className = 'up';
     position_up.setAttribute('href', '');
     position_up.setAttribute('onclick', 'return false;');
     position_up.innerHTML = "up";
     // Position down link.
     var position_down = document.createElement('a');
+    position_down.className = 'down';
     position_down.setAttribute('href', '');
     position_down.setAttribute('onclick', 'return false;');
     position_down.innerHTML = "down";
@@ -152,6 +155,7 @@ $('form').submit(function(event) {
     var gallery_pics = $('.pic').length;
     if (gallery_pics + selected - deleted > 8) {
         event.preventDefault();
+        $('.selected').remove();
         flash("Posts cannot have more than 8 pictures.", 'warning');
     } else {
         return;

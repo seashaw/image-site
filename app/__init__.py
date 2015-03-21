@@ -38,7 +38,7 @@ def getPassword():
 # Load configuration.
 app.config.update(dict(
     # SQLAlchemy database connection address.
-    SQLALCHEMY_DATABASE_URI = 'postgres://angryhos:hobag@localhost/angryhos',
+    SQLALCHEMY_DATABASE_URI = 'postgresql://angryhos:hobag@localhost/angryhos',
 
     SECRET_KEY = "In development.",
     #SERVER_NAME = "www.angryhos.com",

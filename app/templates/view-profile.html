@@ -29,5 +29,15 @@
             </li>
         {% endfor %}
     </ul>
+    <h2 id="heading">comments:</h2>
+    <ul>
+        {% for comment in user.comments%}
+            <li> 
+                <a href="{{ url_for('viewPost', post_id=comment.post_id) }}">
+                    {{ comment.body}}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
     {% include 'footer.html' %}
 {% endblock %}

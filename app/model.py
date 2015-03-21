@@ -9,6 +9,7 @@ Description:
 from . import app, db
 
 from flask.ext.sqlalchemy import SQLAlchemy
+from sqlalchemy import desc
 from sqlalchemy.ext.orderinglist import ordering_list
 
 from flask.ext.login import UserMixin
@@ -45,8 +46,9 @@ class User(db.Model, UserMixin):
 
     roles = db.relationship('Role', secondary=user_roles,
             backref=db.backref('users', lazy='dynamic'))
-    posts = db.relationship('Post', backref='user', order_by="Post.id")
-    comments = db.relationship('Comment', backref='user', order_by="Comment.id")
+    posts = db.relationship('Post', backref='user', order_by="desc(Post.id)")
+    comments = db.relationship('Comment', backref='user',
+            order_by="desc(Comment.id)")
 
     def __init__(self, password='', user_name=''):
         self.password = password
@@ -97,7 +99,7 @@ class Post(db.Model):
     # 'And' construct used to specify that only top level comments
     # without a parent are listed here.  Each comment has its own
     # list of reply comments.
-    comments = db.relationship('Comment', order_by="Comment.id",
+    comments = db.relationship('Comment', order_by="desc(Comment.id)",
             primaryjoin='and_(Post.id==Comment.post_id, '
             'Comment.parent_id==None)')
 

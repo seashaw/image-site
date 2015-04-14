@@ -1,4 +1,4 @@
-﻿function clickEventListener(pos_form) {
+function clickEventListener(pos_form) {
     var children = pos_form.children;
     children[2].addEventListener("click", function(event) {
         event.preventDefault();

@@ -102,6 +102,8 @@ class Post(db.Model):
     comments = db.relationship('Comment', order_by="desc(Comment.id)",
             primaryjoin='and_(Post.id==Comment.post_id, '
             'Comment.parent_id==None)')
+    # Post votes and total score.
+    votes = db.relationship('Vote', backref='post')
 
     def __init__(self, title='', subtitle='', body='', posted_at='',
             user_id=0):
@@ -149,9 +151,10 @@ class Comment(db.Model):
     parent_id = db.Column(db.Integer, db.ForeignKey('comments.id'))
 
     children = db.relationship('Comment', backref=db.backref('parent',
-            remote_side=[id]))
+            remote_side=[id]), order_by="desc(Comment.id)")
 
-    def __init__(self, body='', posted_at = '', user_id=0, post_id=0, parent_id=None):
+    def __init__(self, body='', posted_at = '', user_id=0, post_id=0,
+            parent_id=None):
         self.body = body
         self.posted_at = posted_at
         self.user_id = user_id
@@ -161,3 +164,11 @@ class Comment(db.Model):
     def __repr__(self):
         return '<id: {} parent_id: {} body: {}>'.format(self.id,
                 self.parent_id, self.body)
+
+class Vote(db.Model):
+    """
+    Post votes come in two variants: for / against.
+    """
+    __tablename__ = 'votes'
+    id = db.Column(db.Integer, primary_key=True)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))

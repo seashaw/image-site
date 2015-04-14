@@ -44,10 +44,7 @@ admin_permission = Permission(RoleNeed("Administrator"))
 active_permission = Permission(RoleNeed("Active"))
 verified_permission = Permission(RoleNeed("Verified"))
 
-"""
-Editing Permission.
-"""
-
+# Need and permission for editing user posts.
 BlogPostNeed = namedtuple('blog_post', ['method', 'value'])
 EditBlogPostNeed = partial(BlogPostNeed, 'edit')
 
@@ -59,7 +56,6 @@ class EditBlogPostPermission(Permission):
         need = EditBlogPostNeed(str(post_id))
         super(EditBlogPostPermission, self).__init__(need)
 
-# User information provider for Principal.
 @identity_loaded.connect_via(app)
 def onIdentityLoaded(sender, identity):
     """

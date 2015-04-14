@@ -287,7 +287,7 @@ def logout():
     identity_changed.send(current_app._get_current_object(),
             identity=AnonymousIdentity())
     flash("Logout successful.", "success")
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 @app.route("/reset", methods=["GET", "POST"])
 def requestReset():

@@ -251,7 +251,7 @@ class TestAngryHos(unittest.TestCase):
         ff.find_element_by_id('submit').submit()
         ff.find_element_by_class_name('alert-success')
 
-        # Add one picture over limit.
+        # Add one picture.
         ff.get('localhost:8080/edit/2')
         ff.find_element_by_id('pics').send_keys(
                 '/home/colin/Pictures/windows.png')

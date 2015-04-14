@@ -258,6 +258,18 @@ class TestAngryHos(unittest.TestCase):
         ff.find_element_by_id('submit').submit()
         ff.find_element_by_class_name('alert-warning')
 
+        # Add comment.
+        ff.get('localhost:8080/view/2')
+        ff.find_element_by_id('body').send_keys('This is one fine post. rekt.')
+        ff.find_element_by_id('submit').submit()
+        ff.find_element_by_class_name('alert-success')
+
+        # Reply to previous comment.
+        ff.find_element_by_class_name('reply').click()
+        ff.find_element_by_id('body').send_keys('10/10 would read again.')
+        ff.find_element_by_id('submit').submit()
+        ff.find_element_by_class_name('alert-success')
+
     def tearDown(self):
         """
         Close driver connection and clean up.

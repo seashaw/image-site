@@ -131,8 +131,8 @@ def register():
                 subject = "Please confirm your account."
                 html = "Click <a href='{}'>here</a> to confirm.".format(
                         confirm_url)
-                msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
-                        recipients=[user.email], html=html)
+                msg = Message(sender=app.config["MAIL_USERNAME"],
+                        subject=subject, recipients=[user.email], html=html)
                 mail.send(msg)
                 flash("Confirmation email sent.", "info")
             except Exception as e:
@@ -144,6 +144,7 @@ def register():
             return redirect(request.args.get("next") or url_for("login"))
         except Exception as e:
             flash("User creation failed.", "danger")
+            print(e)
             return redirect(url_for("login"))
     return render_template("register.html", form=form)
 

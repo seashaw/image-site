@@ -41,10 +41,6 @@ app.config.update(dict(
     SQLALCHEMY_DATABASE_URI = 'postgresql://angryhos:hobag@localhost/angryhos',
 
     SECRET_KEY = "In development.",
-    #SERVER_NAME = "www.angryhos.com",
-    SERVER_NAME = 'localhost:8080',
-    # Remove DEBUG line for production.
-    DEBUG = True,
 
     # Mail settings.
     MAIL_SERVER = "smtp.zoho.com",
@@ -60,7 +56,6 @@ app.config.update(dict(
     EXTENSIONS = set(["png", "jpg", "jpeg", "gif"]),
 
     # Upload settings.
-    UPLOAD_FOLDER = '/home/colin/workspace/angryhos/app/static/uploads',
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024 # 5MB
 ))
 
@@ -105,5 +100,3 @@ admin.add_view(UsersView(User, db.session, name='Users'))
 admin.add_view(RolesView(Role, db.session, name='Roles'))
 admin.add_view(PostsView(Post, db.session, name='Posts'))
 admin.add_view(PicturesView(Picture, db.session, name='Pictures'))
-admin.add_view(FileView(app.config["UPLOAD_FOLDER"], '/static/uploads/',
-        name="Uploaded Files"))

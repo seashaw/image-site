@@ -4,10 +4,10 @@ File: wsgi.py
 Authors:
     2014-11-14 - C.Shaw <shaw.colin@gmail.com>
 Description: 
-    Launch web application.
+    Application entry point for uWSGI.
 '''
-
-from app import app
-if __name__ == '__main__':
-    app.config['SERVER_NAME'] = 'localhost:8080'
-    app.run(debug=True)
+from app import app, admin, FileView
+app.config['SERVER_NAME'] = 'image-site.colinshaw.org'
+app.config['UPLOAD_FOLDER'] = '/root/applications/angryhos/app/static/uploads'
+admin.add_view(FileView(app.config["UPLOAD_FOLDER"], '/static/uploads/',
+        name="Uploaded Files"))

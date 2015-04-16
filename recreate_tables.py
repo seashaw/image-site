@@ -14,7 +14,7 @@ db.create_all()
 print("Removing and recreating upload folder.")
 shutil.rmtree('app/static/uploads/1/')
 os.mkdir('app/static/uploads/1')
-os.chmod('app/static/uploads/1', mode=0o664)
+os.chmod('app/static/uploads/1', mode=0o777)
 # Create default user.
 print("Creating new user.")
 user = User(password=bc.generate_password_hash('la73ralu5', rounds=12),

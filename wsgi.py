@@ -8,6 +8,7 @@ Description:
 '''
 from app import app, admin, FileView
 app.config['SERVER_NAME'] = 'image-site.colinshaw.org'
-app.config['UPLOAD_FOLDER'] = '/root/applications/angryhos/app/static/uploads'
+app.config['UPLOAD_FOLDER'] =  \
+        '/home/colin/applications/angryhos/app/static/uploads'
 admin.add_view(FileView(app.config["UPLOAD_FOLDER"], '/static/uploads/',
         name="Uploaded Files"))

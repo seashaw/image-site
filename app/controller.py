@@ -144,7 +144,6 @@ def register():
             return redirect(request.args.get("next") or url_for("login"))
         except Exception as e:
             flash("User creation failed.", "danger")
-            print(e)
             return redirect(url_for("login"))
     return render_template("register.html", form=form)
 

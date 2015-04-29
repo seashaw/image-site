@@ -1,41 +1,664 @@
 ﻿/**
- * Form styling.
+ * Font import and setup.
  */
 
-.hide {
-    display: none;
+@font-face {
+    font-family: arimo-regular;
+    src: url("fonts/Arimo-Regular.ttf") format("truetype");
 }
 
-#copyright {
-    text-align: center;
+@font-face {
+    font-family: arimo-bold;
+    src: url("fonts/Arimo-Bold.ttf") format("truetype");
 }
 
-#comment-form, .panel {
-    margin-left: 10px;
+@font-face {
+    font-family: amatic-bold;
+    src: url("fonts/Amatic-Bold.ttf") format("truetype");
 }
 
-/* Media queries. */
+/**
+ * Color definitions.
+ * https://color.adobe.com/Cherry-Cheesecake-color-theme-2354/
+ */
+
+$color-1: #B9121B;
+$color-2: #4C1B1B;
+$color-3: #F6E497;
+$color-4: #FCFAE1;
+$color-5: #BD8D46;
+
+/**
+ * Global rules for layout.
+ */
+
+// Make space for top navbar..
+body {
+    margin-top: 57px;
+    background-color: $color-4;
+    font-family: arimo-regular;
+    color: $color-2;
+}
+
+// Navbar.
+.navbar {
+    background-color: $color-2;
+    margin-bottom: 0px;
+    border-style: none;
+    .navbar-brand {
+        margin-bottom: 7px;
+        font-family: amatic-bold;
+        color: $color-4;
+        outline: none;
+        &:hover {
+            color: $color-1;
+        }
+    }
+    .navbar-links {
+        a {
+            outline: none;
+            color: $color-4;
+            font-family: amatic-bold;
+            &:hover {
+                color: $color-1;
+            }
+            &:active {
+                color: $color-3;
+            }
+        }
+    }
+}
+
+// Alerts.
+#flash-alerts {
+    .alert {
+        margin-top: 10px;
+    }
+}
+
+#pusher {
+    margin: 0px;
+    border-width: 0px;
+    padding: 0px;
+}
+
+// Footer.
+#footer {
+    background-color: $color-2;
+    height: 30px;
+    #copyright {
+        margin-top: 4px;
+        margin-bottom: 0px;
+        text-align: center;
+        color: $color-4;
+    }
+}
 
 @media(max-width:767px) {
-  .thumbnail img {
-    height: 100px;
-  }
+    .navbar-brand {
+        font-size: 22px;
+    }
+    .navbar-links {
+        margin-top: 13px;
+        a {
+            margin-left: 9px;
+            font-size: 19px;
+        }
+    }
 }
 
 @media(min-width:768px) {
-  .thumbnail img {
-    height: 125px;
-  }
+    .navbar-brand {
+        font-size: 35px;
+    }
+    .navbar-links {
+        margin-top: 10px;
+        a {
+            margin-left: 15px;
+            font-size: 25px;
+        }
+    }
 }
 
 @media(min-width:992px) {
-  .thumbnail img {
-    height: 150px;
-  }
+    .navbar-brand {
+        font-size: 40px;
+    }
+    .navbar-links {
+        margin-top: 10px;
+        a {
+            margin-left: 20px;
+            font-size: 25px;
+        }
+    }
 }
 
 @media(min-width:1200px) {
-  .thumbnail img {
-    height: 175px;
-  }
+    .navbar-brand {
+        font-size: 45px;
+    }
+    .navbar-links {
+        margin-top: 3px;
+        a {
+            margin-left: 30px;
+            font-size: 30px;
+        }
+    }
+}
+
+/**
+ * Index page.
+ */
+
+// Posts.
+#posts {
+    margin-top: 20px;
+    .post {
+        background-color: transparent;
+        border-bottom-style: solid;
+        border-width: 3px;
+        border-color: $color-3;;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+        .title {
+            font-family: arimo-bold;
+            a {
+                outline: none;
+                color: $color-2;
+                &:hover {
+                    color: $color-1;
+                }
+            }
+        }
+        .picture {
+            img {
+                width: 50%;
+            }
+        }
+        .info {
+            margin-top: 10px;
+            color: $color-2;
+            .stats {
+                text-align: left;
+            }
+            .author {
+                font-style: italic;
+                font-size: 12px;
+                text-align: right;
+                a {
+                    font-style: normal;
+                    font-size: 16px;
+                    outline: none;
+                    color: $color-2;
+                    &:hover {
+                        color: $color-1;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// Pagination.
+#navigation {
+    .pagination {
+        a {
+            border-radius: 0px;
+            background-color: $color-4;
+            outline: none;
+            color: $color-2;
+            border-color: $color-1;
+            border-width: 1px;
+            &:hover {
+                background-color: $color-3;
+            }
+        }
+        .active {
+            a {
+                background-color: $color-1;
+                border-color: $color-1;
+                color: $color-4;
+            }
+        }
+    }
+}
+
+/**
+ * Post view.
+ */
+
+#blueimp-gallery {
+    a {
+        border-style: none;
+        background-color: transparent;
+    }
+}
+
+#header {
+    #post-title{
+        font-family: arimo-bold;
+        h3 {
+            margin: 0px;
+        }
+    }
+    #author {
+        text-align: right;
+        p {
+            margin-bottom: 0px;
+            #name {
+                font-style: normal;
+                outline: none;
+                color: $color-2;
+            }
+            #date {
+                font-style: italic;
+                text-align: right;
+            }
+        }
+    }
+}
+
+#thumbs {
+    .image {
+        padding-left: 0px;
+        padding-right: 0px;
+        margin-bottom: 0px;
+        .thumbnail {
+            background-color: transparent;
+            border-style: none;
+            margin-bottom: 0px;
+        }
+
+    }
+}
+
+#post-subtitle {
+    font-family: arimo-bold;
+    h4 {
+        font-size: 16px;
+    }
+}
+
+#comment-form {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+#comments {
+    margin-bottom: 30px;
+    .comment {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-left: 5px;
+        padding-left: 0px;
+        padding-right: 0px;
+        border-left-style: solid;
+        border-top-style: solid;
+        border-color: $color-3;
+        border-width: 2px;
+        .comment-heading {
+            padding-left: 10px;
+            padding-right: 10px;
+            font-family: arimo-bold;
+            background-color: $color-3;
+            .date {
+                font-family: arimo-regular;
+                font-style: italic;
+                text-align: right;
+                font-size: 10px;
+            }
+        }
+        .comment-controls {
+            border-top-style: solid;
+            border-bottom-style: none;
+            border-width: 1px;
+            border-color: $color-3;
+            .reply {
+                color: $color-2;
+                cursor: pointer;
+            }
+        }
+    }
+}
+
+// Utility mixins for spacing.
+@mixin bottom-border() {
+    border-bottom-style: solid;
+    border-width: 3px;
+    border-color: $color-3;;
+}
+
+@mixin buffer($width) {
+    margin-top: $width;
+    margin-bottom: $width;
+    padding-top: $width;
+    padding-bottom: $width;
+}
+
+$buffer-width-xs: 5px;
+$buffer-width-sm: 7px;
+$buffer-width-md: 10px;
+$buffer-width-lg: 12px;
+
+@media(max-width:767px) {
+    #header {
+        @include buffer($buffer-width-xs);
+        @include bottom-border();
+        #title {
+            h3 {
+                font-size: 22px;
+            }
+        }
+        #author {
+            margin-bottom: 0px;
+            #name {
+                font-size: 12px;
+            }
+            #date {
+                font-size: 10px;
+            }
+        }
+    }
+    #thumbs {
+        @include buffer($buffer-width-xs);
+        @include bottom-border();
+        .image {
+            .thumbnail {
+                .img-responsive {
+                    height: 120px;
+                }
+            }
+        }
+    }
+    #post-info {
+        @include buffer($buffer-width-xs);
+        @include bottom-border();
+    }
+    #root-comment {
+        @include buffer($buffer-width-xs);
+    }
+}
+
+@media(min-width:768px) {
+    #header {
+        @include buffer($buffer-width-sm);
+        @include bottom-border();
+        #title {
+            margin-top: 10px;
+            h3 {
+                font-size: 24px;
+            }
+        }
+        #author {
+            margin-top: 15px;
+            #name {
+                font-size: 15px;
+            }
+            #date {
+                font-size: 12px;
+            }
+        }
+    }
+    #thumbs {
+        @include buffer($buffer-width-sm);
+        @include bottom-border();
+        .image {
+            .thumbnail {
+                .img-responsive {
+                    height: 160px;
+                }
+            }
+        }
+    }
+    #post-info {
+        @include buffer($buffer-width-sm);
+        @include bottom-border();
+    }
+    #root-comment {
+        @include buffer($buffer-width-sm);
+    }
+}
+
+@media(min-width:992px) {
+    #header {
+        @include buffer($buffer-width-md);
+        @include bottom-border();
+        #title {
+            margin-top: 15px;
+            h3 {
+                font-size: 27px;
+            }
+        }
+        #author {
+            margin-top: 20px;
+            #name {
+                font-size: 16px;
+            }
+            #date {
+                font-size: 13px;
+            }
+        }
+    }
+    #thumbs {
+        @include buffer($buffer-width-md);
+        @include bottom-border();
+        .image {
+            .thumbnail {
+                .img-responsive {
+                    height: 180px;
+                }
+            }
+        }
+    }
+    #post-info {
+        @include buffer($buffer-width-md);
+        @include bottom-border();
+    }
+    #root-comment {
+        @include buffer($buffer-width-md);
+    }
+}
+
+@media(min-width:1200px) {
+    #header {
+        @include buffer($buffer-width-lg);
+        @include bottom-border();
+        #title {
+            margin-top: 20px;
+            h3 {
+                font-size: 30px;
+            }
+        }
+        #author {
+            margin-top: 25px;
+            #name {
+                font-size: 18px;
+            }
+            #date {
+                font-size: 13px;
+            }
+        }
+    }
+    #thumbs {
+        @include buffer($buffer-width-lg);
+        @include bottom-border();
+        .image {
+            .thumbnail {
+                .img-responsive {
+                    height: 220px;
+                }
+            }
+        }
+    }
+    #post-info {
+        @include buffer($buffer-width-lg);
+        @include bottom-border();
+    }
+    #root-comment {
+        @include buffer($buffer-width-lg);
+    }
+}
+
+/**
+ * Registration page.
+ */
+
+#register-info {
+    margin-bottom: 20px;
+}
+
+/**
+ * Login page.
+ */
+
+#register-prompt {
+    margin-bottom: 20px;
+}
+
+/**
+ * Create post and edit post.
+ */
+
+#picfield {
+    .pic, .selected {
+        .pic-img {
+            img {
+                border-radius: 1px;
+                border-style: none;
+            }
+        }
+        .form {
+            .form-position {
+                i {
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
+
+@media(max-width:767px) {
+    #picfield {
+        @include bottom-border();
+        .pic, .selected {
+            @include buffer($buffer-width-xs);
+            .pic-img {
+                .img-responsive {
+                    height: 100px;
+                }
+            }
+            .form {
+                .form-group {
+                    margin-bottom: 5px;
+                    label {
+                        font-size: 11px;
+                    }
+                }
+                .form-position {
+                    .up {
+                        font-size: 23px;
+                        margin-right: 5px;
+                    }
+                    .down {
+                        font-size: 23px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media(min-width:768px) {
+    #picfield {
+        @include bottom-border();
+        .pic, .selected {
+            @include buffer($buffer-width-sm);
+            .pic-img {
+                .img-responsive {
+                    height: 120px;
+                }
+            }
+            .form {
+                .form-group {
+                    margin-bottom: 5px;
+                    label {
+                        font-size: 14px;
+                    }
+                }
+                .form-position {
+                    .up {
+                        font-size: 21px;
+                        margin-right: 7px;
+                    }
+                    .down {
+                        font-size: 21px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media(min-width:992px) {
+    #picfield {
+        @include bottom-border();
+        .pic, .selected {
+            @include buffer($buffer-width-md);
+            .pic-img {
+                .img-responsive {
+                    height: 140px;
+                }
+            }
+            .form {
+                .form-group {
+                    margin-bottom: 5px;
+                    label {
+                        font-size: 14px;
+                    }
+                }
+                .form-position {
+                    .up {
+                        font-size: 20px;
+                        margin-right: 5px;
+                    }
+                    .down {
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media(min-width:1200px) {
+    #picfield {
+        @include bottom-border();
+        .pic, .selected {
+            @include buffer($buffer-width-lg);
+            .pic-img {
+                .img-responsive {
+                    height: 160px;
+                }
+            }
+            .form {
+                .form-group {
+                    margin-bottom: 5px;
+                    label {
+                        font-size: 14px;
+                    }
+                }
+                .form-position {
+                    .up {
+                        font-size: 20px;
+                        margin-right: 5px;
+                    }
+                    .down {
+                        font-size: 20px;
+                    }
+                }
+            }
+        }
+    }
 }

@@ -27,7 +27,7 @@ from flask.ext.principal import Identity, AnonymousIdentity, identity_changed
 
 from . import app, bc, mail, db
 from .roles import EditBlogPostPermission, activeRole, verifiedRole, \
-        adminRole, active_permission, verified_permission
+        adminRole, active_permission, verified_permission 
 from .model import User, Post, Picture, Comment, Role
 from .forms import LoginForm, RegisterForm, CreatePostForm,  EditPostForm, \
         ServiceRequestForm, PasswordResetForm, EditImageDataForm, RadioField, \
@@ -79,7 +79,7 @@ def index(page):
     Application index, contains list of recent posts.
     """
     # Number of posts per page.
-    ppp = 7
+    ppp = 2
     # Limit of range of pagination.
     range_limit = 10
     # Get posts for page.
@@ -158,11 +158,20 @@ def confirmUser(nonce):
     else:
         now = datetime.now(tz=utc)
         if (now - user.confirm_nonce_issued_at).days >= 1:
-            flash("Confirmation link has expired.", "warning")
+            flash("Confirmation link has expired. Click <a href='" + 
+                    url_for('reconfirm') + "'>here</a> to request another.",
+                    "warning")
         else:
             if user.confirmed_at is None:
+                # Log out user.
+                logout_user()
+                # Remove session keys set by Principal.
+                for key in ("identity.name", "identity.auth_type"):
+                    session.pop(key, None)
+                # Signal Principal that identity changed.
+                identity_changed.send(current_app._get_current_object(),
+                        identity=AnonymousIdentity())
                 path = "{}/{}".format(app.config['UPLOAD_FOLDER'], user.id)
-                os.mkdir(path)
                 os.chmod(path, mode=0o777)
                 user.confirmed_at = now
                 user.roles.append(verifiedRole())
@@ -178,6 +187,8 @@ def confirmUser(nonce):
         return redirect(url_for("login"))
 
 @app.route("/reconfirm", methods=["GET", "POST"])
+@login_required
+@active_permission.require(http_exception=403)
 def reconfirm():
     """
     Allows registered users to request a new confirmation link.
@@ -198,8 +209,8 @@ def reconfirm():
                 subject = "Please confirm your account."
                 html = "Click <a href='{}'>here</a> to confirm.".format(
                         confirm_url)
-                msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
-                        recipients=[user.email], html=html)
+                msg = Message(sender=app.config["MAIL_USERNAME"],
+                        subject=subject, recipients=[user.email], html=html)
                 mail.send(msg)
                 flash("Confirmation email sent.", "info")
                 return redirect(request.args.get("next") or url_for("login"))
@@ -256,8 +267,8 @@ def login():
         if user is None:
             flash("No account for '{}'".format(form.user_name.data), "warning")
             return redirect(url_for("login"))
-        elif activeRole() not in user.roles:
-            flash("Account has been deactivated.  Contact support.", 'warning')
+        elif 'Active' not in user.roles:
+            flash("Account has been deactivated. Contact support.", 'warning')
             return redirect(url_for('index'))
         else: 
             if bc.check_password_hash(user.password, form.password.data):
@@ -310,11 +321,11 @@ def requestReset():
                 subject = "Password reset request."
                 html = "Click <a href='{}'>here</a> to reset password.".format(
                         confirm_url)
-                msg = Message(sender=app.config["MAIL_USERNAME"], subject=subject,
-                        recipients=[user.email], html=html)
+                msg = Message(sender=app.config["MAIL_USERNAME"],
+                        subject=subject, recipients=[user.email], html=html)
                 mail.send(msg)
-                flash("Check your email for instructions to reset your password.",
-                        "info")
+                flash("Check your email for instructions"
+                        " to reset your password.", "info")
                 return redirect(request.args.get("next") or url_for("login"))
             except Exception as e:
                 flash("Request failed.", "danger")
@@ -371,7 +382,7 @@ def createPost():
     if current_user.posts and (datetime.now(tz=utc) -
             current_user.posts[-1].posted_at).days <= 1 and \
             verified_permission.can() is False:
-        flash("You can only post once per day", 'warning')
+        flash("You can only post once per 24 hours period.", 'warning')
         return redirect(url_for('index'))
     form = CreatePostForm()
     if form.validate_on_submit():
@@ -450,7 +461,7 @@ def userPosts():
 def editPost(post_id):
     """
     Editing existing posts.
-    This whole thing is a horrible, horrible mess... Jesus, Lord have mercy!
+    This is a horrible, horrible mess... Jesus, Lord have mercy!
     """
     permission = EditBlogPostPermission(post_id)
     if permission.can():

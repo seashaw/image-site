@@ -1,21 +1,33 @@
 {% extends 'base.html' %}
 {% block body %}
-  {# Form error notifications. #}
-  {% include 'form-errors.html' %}
-  <div class="container">
-    <form role="form" action="/login" method=post accept-charset="utf-8">
-      {{ form.hidden_tag() }}
-      <div class="form-group">
-        {{ form.user_name.label }} 
-        {{ form.user_name(size=80, class_='form-control') }}
-      </div>
-      <div class="form-group">
-        {{ form.password.label }} 
-        {{ form.password(size=64, class_='form-control') }}
-      </div>
-      {{ form.submit(class_="btn btn-default") }}
-    </form>
-    <a href="{{ url_for('register') }}">Register</a>
-  </div> {# end container #}
-  {% include 'footer.html' %}
+{# Form error notifications. #}
+{% include 'form-errors.html' %}
+<div class="container">
+  <div id="register-prompt" class="row">
+    <div class="col-xs-12">
+      Don't have an account? Register now!
+      <a href="{{ url_for('register') }}">It's free.</a>
+    </div>
+  </div>
+  <div id="login-form" class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-lg-6">
+      <form role="form" action="/login" method=post accept-charset="utf-8">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.user_name.label }} 
+          {{ form.user_name(size=80, class_='form-control') }}
+        </div>
+        <div class="form-group">
+          {{ form.password.label }} 
+          {{ form.password(size=64, class_='form-control') }}
+        </div>
+        <div class="form-group">
+          {{ form.submit(class_="btn btn-default") }}
+          <a href="{{ url_for('requestReset') }}">Forgot password?</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div> {# end container #}
+{% include 'footer.html' %}
 {% endblock %}

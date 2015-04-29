@@ -1,87 +1,77 @@
 {% extends "base.html" %}
 {% block body %}
-  {# Form error notification. #}
-  {% include 'form-errors.html' %}
-  <div class="container">
-    <form action="/edit/{{ post.id }}" method=post
-        enctype="multipart/form-data" accept-charset="utf-8">
-      {{ form.hidden_tag() }}
-      <div id='picfield' class="row">
+{# Form error notification. #}
+{% include 'form-errors.html' %}
+<div class="container">
+  <form action="/edit/{{ post.id }}" method=post
+      enctype="multipart/form-data" accept-charset="utf-8">
+    {{ form.hidden_tag() }}
+    <div id='picfield' class="row">
       {% if post.gallery %}
         {% for pic_form, gallery_pic in zipped %}
-        <div class="pic col-xs-6 col-sm-6 col-md-6 col-lg-6">
-          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <a href="../static/uploads/{{ '{}/{}/{}'.format(
-                post.user_id, post.id, gallery_pic.filename) }}"
-                title="{{ gallery_pic.title }}" class="thumbnail"
-                onclick="return false">
+          <div class="pic col-xs-12 col-sm-6 col-md-6 col-lg-6">
+            <div class="pic-img col-xs-12 col-sm-6 col-md-6 col-lg-6">
               <img src="../static/uploads/{{ '{}/{}/thumbnails/{}'.format(
                   post.user_id, post.id, gallery_pic.filename) }}"
                   alt="{{ gallery_pic.filename }}"
                   class="img-responsive img-rounded">
-            </a>
+            </div> {# end col #}
+            <div class="form col-xs-12 col-sm-6 col-md-6 col-lg-6">
+              <div class='form-title form-group'>
+                {{ pic_form.title.label }}
+                {{ pic_form.title(class_='form-control title') }}
+              </div>
+              <div class='form-delete form-group'>
+                {{ pic_form.delete.label }}:
+                {{ pic_form.delete }}
+              </div>
+              <div class="form-cover form-group">
+                <label>Cover:</label>
+                {% if post.cover.filename == gallery_pic.filename: %}
+                  <input type='radio' value='{{ gallery_pic.filename }}'
+                      name='choice' checked>
+                  </input>
+                {% else: %}
+                  <input type='radio' value='{{ gallery_pic.filename }}'
+                      name='choice'>
+                  </input>
+                {% endif %}
+              </div>
+              <div class="form-position form-group">
+                <label>Position:</label>
+                {{ pic_form.position(class_="position-field",
+                    readonly="", size=1, style="display: none;") }}
+                  <i class="up fa fa-caret-square-o-up"></i>
+                  <i class="down fa fa-caret-square-o-down"></i>
+              </div>
+            </div> {# end col #}
           </div> {# end col #}
-          <div class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
-            <div class='form-group'>
-              {{ pic_form.title.label }}
-              {{ pic_form.title(class_='form-control title') }}
-            </div>
-            <div class='form-group'>
-              {{ pic_form.delete.label }}:
-              {{ pic_form.delete }}
-            </div>
-            <p>
-              <label>Select as cover:</label>
-              {% if post.cover.filename == gallery_pic.filename: %}
-                <input type='radio' value='{{ gallery_pic.filename }}'
-                    name='choice' checked>
-                </input>
-              {% else: %}
-                <input type='radio' value='{{ gallery_pic.filename }}'
-                    name='choice'>
-                </input>
-              {% endif %}
-            </p>
-            <p class="position-form">
-              <label>Position:</label>
-              {{ pic_form.position(class_="position-field",
-                  readonly="", size=1, style="display: none;") }}
-              <a class="up" href="" onclick="return false;">
-                up
-              </a>
-              <a class="down" href="" onclick="return false;">
-                down
-              </a>
-            </p>
-          </div> {# end col #}
-        </div> {# end col #}
         {% endfor %}
       {% endif %}
-      </div> {# end row #}
-      <div class="row">
-          <div class="form-group">
-            {{ form.pics.label }}
-            {{ form.pics(multiple="") }}
-          </div>
-          <div class="form-group">
-            {{ form.title.label }}
-            {{ form.title(class_="form-control", size=80) }}
-          </div>
-          <div class="form-group">
-            {{ form.subtitle.label }}
-            {{ form.subtitle(class_="form-control", size=80) }}
-          </div>
-          <div class="form-group">
-            {{ form.body.label }}
-            {{ form.body(class_="form-control") }}
-          </div>
-          {{ form.submit(class_="btn btn-default") }}
-      </div> {# end row #}
-    </form>
-  </div> {# end container #}
-  {# Footer import. #}
-  {% include 'footer.html' %}
-  {# Form JavaScript import. #}
-  <script type="text/javascript" charset="utf-8"
-      src="../static/js/post.js"></script>
+    </div> {# end row #}
+    <div class="row">
+        <div class="form-group">
+          {{ form.pics.label }}
+          {{ form.pics(multiple="") }}
+        </div>
+        <div class="form-group">
+          {{ form.title.label }}
+          {{ form.title(class_="form-control", size=80) }}
+        </div>
+        <div class="form-group">
+          {{ form.subtitle.label }}
+          {{ form.subtitle(class_="form-control", size=80) }}
+        </div>
+        <div class="form-group">
+          {{ form.body.label }}
+          {{ form.body(class_="form-control") }}
+        </div>
+        {{ form.submit(class_="btn btn-default") }}
+    </div> {# end row #}
+  </form>
+</div> {# end container #}
+{# Footer import. #}
+{% include 'footer.html' %}
+<script type="text/javascript" charset="utf-8"
+    src="../static/js/edit.js"></script>
 {% endblock %}

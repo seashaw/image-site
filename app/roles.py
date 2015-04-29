@@ -19,6 +19,10 @@ principal = Principal(app)
 """
 Methods to retrieve roles from database.
 """
+active_role = Role(name="Active", description="Active user.")
+verified_role = Role(name="Verified",
+        description="User with a verified email.")
+admin_role = Role(name="Administrator", description="Administrator.")
 def adminRole():
     """
     Returns administrator role from database.

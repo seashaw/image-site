@@ -1,28 +1,46 @@
 {% extends "base.html" %}
 {% block body %}
-  {# Form error notifications. #}
-  {% include 'form-errors.html' %}
-  <div class="container">
-    <form role="form" action="/register" method=post accept-charset="utf-8">
-      {{ form.hidden_tag() }}
-      <div class="form-group">
-        {{ form.email.label }}
-        {{ form.email(size=80, class_="form-control") }}
-      </div>
-      <div class="form-group">
-        {{ form.user_name.label }}
-        {{ form.user_name(size=80, class_="form-control") }}
-      </div>
-      <div class="form-group">
-        {{ form.password.label }}
-        {{ form.password(size=80, class_="form-control") }}
-      </div>
-      <div class="form-group">
-        {{ form.confirm.label }}
-        {{ form.confirm(size=80, class_="form-control") }}
-      </div>
-      {{ form.submit(class_="btn btn-default") }}
-    </form>
-  </div> {# end container #}
-  {% include 'footer.html' %}
+{# Form error notifications. #}
+{% include 'form-errors.html' %}
+<div class="container">
+  <div class="row">
+    <div id="register-info" class="col-xs-12">
+      Fill out form to continue with registration.
+      <br><br>
+      Supplying an email address is optional and is required only for
+      account verification.
+      <br><br>
+      Verified accounts allow for more than one post per 24 hours period as
+      well as having the ability to reset password if forgotten.
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-10 col-md-8 col-lg-6">
+      <form role="form" action="/register" method=post accept-charset="utf-8">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          {{ form.email.label }}
+            <span>
+              (optional)
+            </span>
+          {{ form.email(size=80, class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.user_name.label }}
+          {{ form.user_name(size=80, class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.password.label }}
+          {{ form.password(size=80, class_="form-control") }}
+        </div>
+        <div class="form-group">
+          {{ form.confirm.label }}
+          {{ form.confirm(size=80, class_="form-control") }}
+        </div>
+        {{ form.submit(class_="btn btn-default") }}
+      </form>
+    </div>
+  </div>
+</div> {# end container #}
+{% include 'footer.html' %}
 {% endblock %}

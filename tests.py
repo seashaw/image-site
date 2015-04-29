@@ -35,12 +35,9 @@ def recreateDatabase():
     os.mkdir('app/static/uploads/1')
     os.chmod('app/static/uploads/1', mode=0o777)
     print("Creating application roles and first user.")
-    user = User(password=bc.generate_password_hash('12345678', rounds=12),
-            user_name='tester1')
-    active_role = Role(name="Active", description="Active user.")
-    verified_role = Role(name="Verified",
-            description="User with a verified email.")
-    admin_role = Role(name="Administrator", description="Administrator.")
+    user = User(password=bc.generate_password_hash('la73ralu5', rounds=12),
+            user_name='cshaw')
+    from app.roles import active_role, admin_role, verified_role
     db.session.add(admin_role)
     db.session.add(active_role)
     db.session.add(verified_role)
@@ -83,9 +80,9 @@ class TestAngryHos(unittest.TestCase):
         ff.get("localhost:8080/index")
         ff.find_element_by_id('login').click()
         input = ff.find_element_by_id('user_name')
-        input.send_keys("tester1")
+        input.send_keys("cshaw")
         input = ff.find_element_by_id('password')
-        input.send_keys("12345678")
+        input.send_keys("la73ralu5")
         input.submit()
         success_alert = ff.find_element_by_class_name(
                 'alert-success')
@@ -106,9 +103,9 @@ class TestAngryHos(unittest.TestCase):
         ff.get("localhost:8080/index")
         ff.find_element_by_id('login').click()
         input = ff.find_element_by_id('user_name')
-        input.send_keys("tester1")
+        input.send_keys("cshaw")
         input = ff.find_element_by_id('password')
-        input.send_keys("12345678")
+        input.send_keys("la73ralu5")
         input.submit()
         success_alert = ff.find_element_by_class_name(
                 'alert-success')
@@ -265,7 +262,8 @@ class TestAngryHos(unittest.TestCase):
         ff.find_element_by_class_name('alert-success')
 
         # Reply to previous comment.
-        ff.find_element_by_class_name('reply').click()
+        # Changed to click the internal icon and not the link itself.
+        ff.find_element_by_class_name('fa-reply').click()
         ff.find_element_by_id('body').send_keys('10/10 would read again.')
         ff.find_element_by_id('submit').submit()
         ff.find_element_by_class_name('alert-success')

@@ -21,10 +21,7 @@ user = User(password=bc.generate_password_hash('la73ralu5', rounds=12),
         user_name='cshaw')
 # Creating roles.
 print("Creating roles.")
-active_role = Role(name="Active", description="Active user.")
-verified_role = Role(name="Verified",
-        description="User with a verified email.")
-admin_role = Role(name="Administrator", description="Administrator.")
+from app.roles import active_role, admin_role, verified_role
 print("Adding roles to session.")
 db.session.add(admin_role)
 db.session.add(active_role)

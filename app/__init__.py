@@ -38,7 +38,8 @@ def getPassword():
 # Load configuration.
 app.config.update(dict(
     # SQLAlchemy database connection address.
-    SQLALCHEMY_DATABASE_URI = 'postgresql://angryhos:hobag@localhost/angryhos',
+    SQLALCHEMY_DATABASE_URI = 
+            'postgresql://image_app:snapsnap@localhost/image_site',
 
     SECRET_KEY = "In development.",
 
@@ -47,10 +48,10 @@ app.config.update(dict(
     MAIL_PORT = 465,
     MAIL_USE_TLS = False,
     MAIL_USE_SSL = True,
-    MAIL_USERNAME = "noreply@angryhos.com",
+    MAIL_USERNAME = "noreply@colinshaw.org",
     MAIL_PASSWORD = getPassword(),
 
-    ADMIN_EMAIL = "administrator@angryhos.com",
+    ADMIN_EMAIL = "administrator@colinshaw.org",
 
     # Set of allowed file extensions.
     EXTENSIONS = set(["png", "jpg", "jpeg", "gif"]),

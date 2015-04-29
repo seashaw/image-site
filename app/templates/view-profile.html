@@ -1,43 +1,68 @@
 {% extends 'base.html' %}
 {% block body %}
-    <h1 id="heading">{{ user.user_name }}</h1>
-    {% if verified %}
-      <h1>verified</h1>
-    {% else %}
-      <h1>
-        not verified:
-        <a href="{{ url_for('verify', user_name=user.user_name) }}">
-          click here to confirm your email address
-        </a>
-      </h1>
-    {% endif %}
-    <h2 id="heading">Roles:</h2>
-    <ul>
-        {% for role in user.roles %}
-            <li>
-                {{ role.name }} - {{ role.description }}
-            </li>
+<div class="container">
+
+  <div id="profile-user" class="row">
+    <div class="col-xs-12">
+      <h2>{{ user.user_name }}</h2>
+      {% if verified: %}
+        <p>
+          {{ user.email }}
+        </p>
+      {% else %}
+          <a href="{{ url_for('verify', user_name=user.user_name) }}">
+            click here to verify your email address
+          </a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div id="profile-roles" class="row">
+    <div class="col-xs-12">
+      <h3>Roles:</h3>
+      <ul>
+        {% for role in user.roles: %}
+          <li>
+            {{ role.name }} - {{ role.description }}
+          </li>
         {% endfor %}
-    </ul>
-    <h2 id="heading">Posts:</h2>
-    <ul>
-        {% for post in user.posts %}
-            <li> 
-                <a href="{{ url_for('viewPost', post_id=post.id) }}">
-                    {{ post.title }}
-                </a>
-            </li>
+      </ul>
+    </div>
+  </div>
+
+  <div id="profile-posts" class="row">
+    <div class="col-xs-12">
+      <h3>Posts:</h3>
+      <ol reversed>
+        {% for post in user.posts: %}
+          <li> 
+            <a href="{{ url_for('viewPost', post_id=post.id) }}">
+              {{ post.title }}
+            </a>
+            <a href="{{ url_for('editPost', post_id=post.id) }}">
+              <i class="fa fa-pencil-square-o"></i>
+            </a>
+          </li>
         {% endfor %}
-    </ul>
-    <h2 id="heading">comments:</h2>
-    <ul>
-        {% for comment in user.comments%}
-            <li> 
-                <a href="{{ url_for('viewPost', post_id=comment.post_id) }}">
-                    {{ comment.body}}
-                </a>
-            </li>
+      </ol>
+    </div>
+  </div>
+
+  <div id="profile-comments" class="row">
+    <div class="col-xs-12">
+      <h3>Comments:</h3>
+      <ol reversed>
+        {% for comment in user.comments: %}
+          <li> 
+            <a href="{{ url_for('viewPost', post_id=comment.post_id) }}">
+              {{ comment.body}}
+            </a>
+          </li>
         {% endfor %}
-    </ul>
-    {% include 'footer.html' %}
+      </ol>
+    </div>
+  </div>
+
+</div>
+{% include 'footer.html' %}
 {% endblock %}

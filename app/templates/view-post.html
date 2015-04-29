@@ -1,100 +1,130 @@
 {% extends 'base.html' %}
 {% block body %}
-  {# blueimp Gallery CSS. #}
-  <link rel="stylesheet"
-      href="../static/css/blueimp-gallery.min.css" type="text/css">
-  <div class="container">
-    <div class="row">
+{# blueimp Gallery CSS. #}
+<link rel="stylesheet" 
+     href="../static/css/blueimp-gallery.min.css" type="text/css">
+<div class="container">
+  <div id="header" class="row">
+    <div id="post-title" class="col-xs-12 col-sm-6">
       <h3>
         {{ post.title }}
-        <span>
-          published by {{ post.user.user_name }} on 
-          {{ post.posted_at.strftime("%a, %b %d, %Y at %I:%M%p") }}
-        </span>
       </h3>
-    </div> {# end row #}
-    <div class="row">
-      {% if post.gallery %}
+    </div>
+    <div id="author" class="col-xs-12 col-sm-6">
+      <p>
+        <span id="name">
+          {{ post.user.user_name }}
+        </span>
+        <span id="date">
+          {{ post.posted_at.strftime('%Y-%m-%d %H:%M') }}
+        </span>
+      </p>
+    </div>
+  </div> {# end row #}
+  {% if post.gallery %}
+    <div id="thumbs" class="row">
         {# Gallery widget. #}
         <div id="blueimp-gallery"
             class="blueimp-gallery blueimp-gallery-controls">
           <div class="slides"></div>
           <h3 class="title"></h3>
-          <a class="prev">‹</a>
-          <a class="next">›</a>
-          <a class="close">×</a>
+          <a class="prev"><i class="fa fa-angle-left"></i></a>
+          <a class="next"><i class="fa fa-angle-right"></i></a>
+          <a class="close"><i class="fa fa-times"></i></a>
           <a class="play-pause"></a>
           <ol class="indicator"></ol>
         </div>
         {# Gallery picture thumbnails and links. #}
-        <div id="links" class="links">
+        <div id="links" class="links clearfix">
           {% for pic in post.gallery %}
-            <div class="col-xs-6 col-sm-3 col-md-3 col-lg-3">
+            <div class="image col-xs-6 col-sm-3 col-md-3 col-lg-3">
               <a href="../static/uploads/{{ '{}/{}/{}'.format(
                   post.user_id, post.id, pic.filename) }}"
                   title="{{ pic.title }}" class="thumbnail">
                 <img src="../static/uploads/{{ '{}/{}/thumbnails/{}'.format(
                     post.user_id, post.id, pic.filename) }}"
                     alt="{{ pic.title }}"
-                    class="img-responsive img-rounded">
+                    class="img-responsive">
               </a>
             </div>
           {% endfor %}
         </div>
+    </div> {# end row #}
+  {% endif %}
+  {% if post.subtitle or post.body: %}
+    <div id="post-info" class="row">
+      {% if post.subtitle: %}
+        <div id="post-subtitle" class="col-xs-12">
+          <h4>
+            {{ post.subtitle }}
+          </h4>
+        </div>
+      {% endif %}
+      {% if post.body: %}
+        <div id="post-body" class="col-xs-12">
+          <p>
+            {{ post.body }}
+          </p>
+        </div>
       {% endif %}
     </div> {# end row #}
-    <div class="row">
-      <h4>
-        {{ post.subtitle }}
-      </h4>
-      <p>
-        {{ post.body }}
-      </p>
-    </div> {# end row #}
-    {% if current_user.is_authenticated() %}
-    <div id='root-comment' class='row'>
-      {{ form.body.label }}
-      <form id="comment-form" action="/view/{{ post.id }}" method=post
+  {% endif %}
+  {% if current_user.is_authenticated() %}
+  <div id='root-comment' class='row'>
+    <div id="comment-form" class="col-xs-12">
+      <form action="/view/{{ post.id }}" method=post
           accept-charset="utf-8">
         {{ form.hidden_tag() }}
         <div class="form-group">
-          {{ form.body(class_='form-control') }}
+          {{ form.body(class_='form-control',
+              placeholder='Leave a comment...') }}
           {{ form.submit(class_='btn btn-default') }}
-          <a id="cancel" class="hide" href="" onclick="return false;">
+          <a id="cancel" class="hidden" href="" onclick="return false;">
             Cancel
           </a>
           {{ form.parent_id(class_='hide', readonly=true) }}
         </div>
       </form>
     </div>
-    {% endif %}
-    <div class="row">
-      {% for comment in post.comments recursive %}
-        <div class="panel panel-default" data-id={{ comment.id }}>
-          <div class="panel-heading">
-            {{ comment.user.user_name }}
-            {% if current_user.is_authenticated() %}
-              <a class="reply" href="" onclick="return false;">
-                Reply
-              </a>
-            {% endif %}
+  </div>
+  {% endif %}
+  <div id="comments" class="row">
+    {# Select all root level comments and iterate recursively. #}
+    {% for comment in post.comments|selectattr(
+            'parent_id', 'none') recursive %}
+      <div id="{{ comment.id }}" class="comment col-xs-12">
+        <div class="comment-heading col-xs-12">
+          {{ comment.user.user_name }}
+          <span class="date pull-right">
+            {{ comment.posted_at.strftime('%Y-%m-%d %H:%M') }}
+          </span>
+        </div>
+        <div class="comment-body col-xs-12">
+          {{ comment.body }}
+        </div>
+        {% if current_user.is_authenticated() %}
+          <div class="comment-controls col-xs-12">
+            {# Had to remove surrounding anchor tags, caused unpredictable
+                behaviour when handling click events. #}
+            <i class="reply fa fa-reply"></i>
           </div>
-          <div class="panel-body">
-            {{ comment.body }}
-          </div>
-          {% if comment.children %}
-            {{ loop(comment.children) }}
-          {% endif %}
-        </div> {# end col #}
-      {% endfor %}
-    </div>  {# end row #}
-  </div> {# end container #}
-  {# Footer import. #}
-  {% include 'footer.html' %} {# JavaScript imports. #}
-  {# Gallery import. #}
-  <script type="text/javascript" charset="utf-8"
-      src="../static/js/blueimp-gallery.js"></script>
-  {# Custom JavaScript import. #}
-  <script type="text/javascript" charset="utf-8"
-      src="../static/js/view-post.js"></script>
+        {% endif %}
+        {% if comment.children %}
+          {{ loop(comment.children) }}
+        {% endif %}
+      </div> {# end col #}
+    {% endfor %}
+  </div>  {# end row #}
+</div> {# end container #}
+
+{# Footer import. #}
+{% include 'footer.html' %}
+
+{# Gallery import. #}
+<script type="text/javascript" charset="utf-8"
+    src="../static/js/blueimp-gallery.js"></script>
+
+{# Custom JavaScript import. #}
+<script type="text/javascript" charset="utf-8"
+    src="../static/js/view.js"></script>
 {% endblock %}

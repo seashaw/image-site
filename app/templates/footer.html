@@ -1,20 +1,23 @@
-<div class="container-fluid">
+<div id="pusher" class="container-fluid invisible">
+</div>
+<div id="footer" class="container-fluid">
   <div class="row">
-    <div id="footer" class="col-xs-12">
-      <p id="copyright" class='foot-notice'>
-        Copyright © 2014 - {{ now.year }}
-      </p>
-      {# Global JavaScript imports. #}
-      {# jQuery CDN #}
-      <script type="text/javascript" charset="utf-8"
-          src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-      {# Bootstrap JavaScript CDN #}
-      <script type="text/javascript" charset="utf-8"
-          src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
-      </script>
-      {# Flask-style flash JavaScript import. #}
-      <script type="text/javascript" charset="utf-8"
-          src="../static/js/flash.js"></script>
-    </div>
+    <p id="copyright" class='foot-notice'>
+      <i class="fa fa-copyright"></i> 2014 - {{ now.year }}
+    </p>
+    {# jQuery CDN #}
+    <script type="text/javascript" charset="utf-8"
+        src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    {# Bootstrap JavaScript CDN #}
+    <script type="text/javascript" charset="utf-8"
+        src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
+    </script>
+
+    {# JavaScript imports. #}
+    <script type="text/javascript" charset="utf-8"
+        src="../static/js/push-footer.js"></script>
+
+    <script type="text/javascript" charset="utf-8"
+        src="../static/js/flash.js"></script>
   </div>
 </div>

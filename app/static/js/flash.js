@@ -1,4 +1,5 @@
-﻿function flash(message, category) {
+﻿// Flask-style alert flashing.
+function flash(message, category) {
     if (typeof category === 'undefined') {
         var div_class = 'alert alert-message alert-dismissable';
     } else {
@@ -13,6 +14,9 @@
     button.type = 'button';
     button.className = 'close';
     button.setAttribute('data-dismiss', 'alert');
+    button.addEventListener('click', function(event) {
+        window.setTimeout('pushFooter()', 1);
+    }, false);
     // Glyphicon for button.
     var glyph = document.createElement('span');
     glyph.className = 'glyphicon glyphicon-remove';
@@ -31,6 +35,17 @@
     div.appendChild(msg);
     // Flash to page.
     document.getElementById('flash-alerts').appendChild(div);
+    pushFooter();
     // Scroll to top of page.
     document.body.scrollTop = document.documentElement.scrollTop = 0;
+}
+
+// Attach closing event handler to flash messages generated server-side.
+var close_buttons = document.getElementsByClassName('alert');
+if (close_buttons.length > 0) {
+    for (var i = 0; i < close_buttons.length; i++) {
+        close_buttons[i].addEventListener('click', function(event) {
+            window.setTimeout('pushFooter()', 1);
+        }, false);
+    };
 }

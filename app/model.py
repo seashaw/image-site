@@ -69,6 +69,12 @@ class Role(db.Model):
     def __init__(self, name='', description=''):
         self.name = name
         self.description = description
+
+    def __eq__(self, other):
+        return self.name == other
+
+    def __hash__(self):
+        return hash(self.name)
         
     def __repr__(self):
         return '<id: {} name: {}>'.format(self.id, self.name)
@@ -99,9 +105,15 @@ class Post(db.Model):
     # 'And' construct used to specify that only top level comments
     # without a parent are listed here.  Each comment has its own
     # list of reply comments.
+    """
     comments = db.relationship('Comment', order_by="desc(Comment.id)",
             primaryjoin='and_(Post.id==Comment.post_id, '
             'Comment.parent_id==None)')
+    """
+    # Select all comments related to post, filter out root level commet
+    # in the template.
+    comments = db.relationship('Comment', order_by='desc(Comment.id)',
+            primaryjoin='Post.id==Comment.post_id')
     # Post votes and total score.
     votes = db.relationship('Vote', backref='post')
 

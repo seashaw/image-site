@@ -118,6 +118,10 @@ def register():
         user = User(password=bc.generate_password_hash(form.password.data,
                 rounds=12), user_name=form.user_name.data)
         user.roles.append(activeRole())
+        db.session.flush()
+        path = "{}/{}".format(app.config['UPLOAD_FOLDER'], user.id)
+        os.mkdir(path)
+        os.chmod(path, mode=0o777)
         if form.email.data:
             user.email = form.email.data
             # Generate cryptographic nonce with datetime.
@@ -171,8 +175,6 @@ def confirmUser(nonce):
                 # Signal Principal that identity changed.
                 identity_changed.send(current_app._get_current_object(),
                         identity=AnonymousIdentity())
-                path = "{}/{}".format(app.config['UPLOAD_FOLDER'], user.id)
-                os.chmod(path, mode=0o777)
                 user.confirmed_at = now
                 user.roles.append(verifiedRole())
                 flash("Account confirmation successful.", "success")

@@ -44,9 +44,16 @@ function appendPic(filename) {
     // Container div.
     var div = document.createElement('div');
     div.className = 'selected col-xs-12 col-sm-6 col-md-6 col-lg-6';
+    // Placeholder form div.
+    var pic_placeholder = document.createElement('div');
+    pic_placeholder.className = 'pic col-xs-1';
+    var pic_img = document.createElement('div');
+    pic_img.className = 'pic-img col-xs-12';
+    var img = document.createElement('img');
+    img.className = 'img-responsive';
     // Form div.
     var form = document.createElement('div');
-    form.className = 'form col-xs-12';
+    form.className = 'form col-xs-11';
     // Title div.
     var title = document.createElement('div');
     title.className = 'form-title form-group';
@@ -134,6 +141,9 @@ function appendPic(filename) {
     form.appendChild(title_input);
     form.appendChild(radio);
     form.appendChild(position);
+    pic_img.appendChild(img);
+    pic_placeholder.appendChild(pic_img);
+    div.appendChild(pic_placeholder);
     div.appendChild(form);
     // Add to picfield.
     document.getElementById('picfield').appendChild(div);

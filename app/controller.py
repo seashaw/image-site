@@ -17,9 +17,9 @@ from pytz import timezone, utc
 from PIL import Image
 from werkzeug import secure_filename
 from sqlalchemy import desc
-
 from flask import (Flask, render_template, jsonify, request, redirect,
         url_for, flash, current_app, session, abort)
+
 from flask.ext.login import (login_required, login_user, logout_user,
         current_user)
 from flask.ext.mail import Message
